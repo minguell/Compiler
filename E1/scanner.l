@@ -1,107 +1,75 @@
 %{
-//Aluno: Miguel Dutra Fontes Guerra
-//Cartão UFRGS: 00342573
-
+// Miguel Dutra Fontes Guerra - 342573
+#include "stdio.h"
 #include "tokens.h"
-#include "symbols.hpp"
 
-int lineNumber = 1;
 int running = 1;
-
-char* reverseINT(char* num);
-char* reverseREAL(char* num);
-
+int lineNumber = 1;
 %}
-
-%option nounput
-%option noinput
 
 %x COMMENT
 
 %%
 
-"byte"                      { return KW_BYTE; }
-"int"                       { return KW_INT; }
-"real"                      { return KW_REAL; }
+"byte"           { return KW_BYTE; }
+"int"            { return KW_INT; }
+"real"           { return KW_REAL; }
+"if"             { return KW_IF; }
+"else"           { return KW_ELSE; }
+"do"             { return KW_DO; }
+"while"          { return KW_WHILE; }
+"read"           { return KW_READ; }
+"print"          { return KW_PRINT; }
+"return"         { return KW_RETURN; }
 
-"if"                        { return KW_IF; }
-"else"                      { return KW_ELSE; }
-"do"                        { return KW_DO; }
-"while"                     { return KW_WHILE; }
-"read"                      { return KW_READ; } 
-"print"                     { return KW_PRINT; }
-"return"                    { return KW_RETURN; } 
+[,;:()\[\]{}=+\-*/%<>&|~] { return yytext[0]; }
 
-"<="                        { return OPERATOR_LE; }
-">="                        { return OPERATOR_GE; }
-"=="                        { return OPERATOR_EQ; }
-"!="                        { return OPERATOR_DIF; }
+"<="            { return OPERATOR_LE; }
+">="            { return OPERATOR_GE; }
+"=="            { return OPERATOR_EQ; }
+"!="            { return OPERATOR_DIF; }
 
-[,;:()\[\]{}=\+\-*/%<>&|~]  { return yytext[0]; } //menos na frente?
+[a-zA-Z_][a-zA-Z_0-9]*  { return TK_IDENTIFIER; }
 
-[a-zA-Z_][a-zA-Z0-9_]*      { symbolInsert(TK_IDENTIFIER, yytext); return TK_IDENTIFIER; }
+[0-9]+                 { return LIT_INT; }
 
-[0-9]+                      { symbolInsert(LIT_INT, reverseINT(yytext)); return LIT_INT; }
-[0-9]+\/[0-9]+              { symbolInsert(LIT_REAL, reverseREAL(yytext)); return LIT_REAL; }
-\"([^\\\"]|\\.)*\"          { symbolInsert(LIT_STRING, yytext); return LIT_STRING; }
-\'[^\']\'                   { symbolInsert(LIT_CHAR, yytext); return LIT_CHAR; }
+"'"(\\.|[^'\n])"'"  { return LIT_CHAR; }
 
-[ \t]                       { }
-\r?\n                       { lineNumber++; }
+[0-9]+"/"[0-9]+        { return LIT_REAL; }
 
-"//".*
+\"([^"\\]|\\.)*\"  { return LIT_STRING; }
 
-"\/--"                      { BEGIN(COMMENT); }
+[ \t\r\f\v]+         /* Ignora espaços e tabulações */
 
-.                           { return TOKEN_ERROR; } 
+\n                     { lineNumber++; }
 
-<COMMENT>\n                 { ++lineNumber; }
-<COMMENT>"--/"              { BEGIN(INITIAL); }
-<COMMENT>. 
+"//".*                /* Ignora comentários de uma linha */
 
+"/--"                 { BEGIN(COMMENT); }
+
+<COMMENT>"--/"        { BEGIN(INITIAL); }
+<COMMENT>\n           { lineNumber++; }
+<COMMENT>.            /* Ignora conteúdo do comentário */
+
+.  { printf("Erro lexico na linha %d: caractere invalido '%s'\n", lineNumber, yytext); return TOKEN_ERROR; }
 
 %%
 
+#include "main.cpp"
 
-int getLineNumber(){
-    return lineNumber;
-}
+extern int yylex(void);
 
-int isRunning(){
-    return running;
-}
-
-void initMe() {
-
-}
-
-int yywrap(){
+int yywrap() {
     running = 0;
     return 1;
 }
 
-char* reverseINT(char* num) {
-    int len = strlen(num);
-    for (int i = 0; i < len / 2; i++) {
-        char temp = num[i];
-        num[i] = num[len - i - 1];
-        num[len - i - 1] = temp;
-    }
-    return num;
+void initMe(void) {}
+
+int getLineNumber(void) {
+    return lineNumber;
 }
 
-char* reverseREAL(char* num){
-
-    char* num1 = strtok(num, "/");
-    char* num2 = strtok(NULL, "/");
-    
-    reverseINT(num1);
-    reverseINT(num2);
-
-    size_t revSize = strlen(num1) + strlen(num2) + 2;
-    char* rev = (char*)malloc(revSize);
-    snprintf(rev, revSize, "%s/%s", num1, num2);
-
-    return rev;
-
+int isRunning(void){
+    return running;
 }
