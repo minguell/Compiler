@@ -5,6 +5,7 @@
 #include "tokens.h"
 %}
 
+%option noyywrap
 %option yylineno
 
 
@@ -40,3 +41,13 @@
 .                   {return TK_ER; }
 
 %%
+
+int main(int argc, char* argv[])
+{
+    int token;
+    while ((token = yylex())) {
+        // Imprime o token encontrado (para depuração)
+        printf("Token: %d, Texto: '%s', Linha: %d\n", token, yytext, yylineno);
+    }
+    return 0;
+}
