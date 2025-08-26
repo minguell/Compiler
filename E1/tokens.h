@@ -1,39 +1,20 @@
-/*
- * Compiladores - etapa1 - tokens.h - semestre 2025/1 - M Johann
- *
- * Lista dos tokens, com valores constantes associados.
- * Este arquivo serah posterioremente substituido, nao acrescente nada.
- * Os valores das constantes sao arbitrarios, mas nao podem ser alterados.
- * Cada valor deve ser distinto e fora da escala ascii.
- * Assim, nao conflitam entre si e com os tokens representados pelo proprio
- * valor ascii de caracteres isolados.
- */
+#define TK_TIPO           301
+#define TK_VAR            302
+#define TK_SENAO          303
+#define TK_DECIMAL        304
+#define TK_SE             305
+#define TK_INTEIRO        306
+#define TK_ATRIB          307
+#define TK_RETORNA        308
+#define TK_SETA           309
+#define TK_ENQUANTO       310
+#define TK_COM            311
+#define TK_OC_LE          312
+#define TK_OC_GE          313
+#define TK_OC_EQ          314
+#define TK_OC_NE          315
+#define TK_ID             316
+#define TK_LI_INTEIRO     317
+#define TK_LI_DECIMAL     318
+#define TK_ER             319
 
- #define KW_BYTE           256
- #define KW_INT            257
- #define KW_REAL           258
- 
- #define KW_IF             261
- #define KW_ELSE           263
- #define KW_DO             264
- #define KW_WHILE          265
- #define KW_READ           266
- #define KW_PRINT          267
- #define KW_RETURN         268
- 
- #define OPERATOR_LE       270
- #define OPERATOR_GE       271
- #define OPERATOR_EQ       272
- #define OPERATOR_DIF      273
- 
- #define TK_IDENTIFIER     280
- 
- #define LIT_INT           281
- #define LIT_CHAR          282
- #define LIT_REAL          283
- #define LIT_STRING        286
- 
- #define TOKEN_ERROR       290
- 
- /* END OF FILE */
- 
