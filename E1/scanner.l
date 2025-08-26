@@ -24,18 +24,21 @@ int lineNumber = 1;
 
 [,;:()\[\]{}=+\-*/%<>&|~] { return yytext[0]; }
 
-"<="            { return OPERATOR_LE; }
-">="            { return OPERATOR_GE; }
-"=="            { return OPERATOR_EQ; }
-"!="            { return OPERATOR_DIF; }
+"<="            { return TK_OC_LE; }
+">="            { return TK_OC_GE; }
+"=="            { return TK_OC_EQ; }
+"!="            { return TK_OC_NE; }
+":="            { return TK_ATRIB; }
+"->"            { return TK_SETA; }
+
 
 [a-zA-Z_][a-zA-Z_0-9]*  { return TK_IDENTIFIER; }
 
-[0-9]+                 { return LIT_INT; }
+[0-9]+                 { return TK_LI_INTEIRO; }
 
-"'"(\\.|[^'\n])"'"  { return LIT_CHAR; }
+"'"(\\.|[^'\n])"'"  { return TK_LI_DECIMAL; }
 
-[0-9]+"/"[0-9]+        { return LIT_REAL; }
+[0-9]+"."[0-9]+        { return LIT_REAL; }
 
 \"([^"\\]|\\.)*\"  { return LIT_STRING; }
 
