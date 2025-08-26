@@ -2,13 +2,11 @@
  Miguel Dutra Fontes Guerra - 342573 */
 
 %{
-#include "stdio.h"
 #include "tokens.h"
-
-int running = 1;
 %}
 
 %option yylineno
+
 
 %%
 
