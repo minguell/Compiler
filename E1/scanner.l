@@ -41,3 +41,8 @@
 .                   {return TK_ER; }
 
 %%
+
+int get_line_number(void)
+{
+    return yylineno;
+}
