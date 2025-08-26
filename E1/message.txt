@@ -1,0 +1,130 @@
+// -------------------------------------------------------------------
+// Arquivo de teste abrangente para o Analisador Léxico da E1
+// Prof. Lucas Mello Schnorr
+// Testa todas as regras especificadas no documento do projeto.
+// -------------------------------------------------------------------
+
+// Seção 1: Teste de Palavras Reservadas
+// Cada palavra reservada deve ser reconhecida individualmente.
+
+tipo
+var
+senao
+decimal
+se
+inteiro
+retorna
+enquanto
+com
+
+// Seção 2: Teste de Literais
+// Testa literais inteiros e decimais em vários formatos.
+
+// Literais inteiros
+123
+0
+9876543210
+1
+
+// Literais decimais
+1.23
+0.5
+3.14159
+12345.67890
+.99// Teste de borda: parte inteira opcional
+0.0
+
+// Seção 3: Teste de Identificadores
+// Testa identificadores válidos de acordo com a regra: [a-z_][a-z0-9_]*
+
+a
+variavel_x
+_um_identificador_que_comeca_com_underline
+var1
+var_2
+nome_longo_de_identificador_para_testar_tamanho
+x_
+_
+
+// Seção 4: Teste de Operadores e Caracteres Especiais
+
+// Operadores Compostos
+<=
+>=
+==
+!=
+:=
+->
+
+// Caracteres Especiais Simples (devem retornar seu código ASCII)
+! * / % + - < > [ ] ( ) = , ; & |
+
+// Seção 5: Teste de Comentários e Espaços em Branco
+// O analisador deve ignorar tudo nesta seção, mas contar as linhas corretamente.
+
+    // Linha com comentário e espaços no início.
+
+var x := 10;    // Comentário no final da linha.
+                // Esta linha contém apenas um comentário.
+
+// A linha acima está em branco. A contagem de linhas deve ser precisa.
+
+inteiro      y   := // Comentário no meio de uma declaração
+                20;
+
+
+// Seção 6: Teste de Integração e Combinações Complexas
+// Simula trechos de código para testar a sequência de tokens.
+
+tipo funcao_soma -> inteiro (var a -> inteiro, var b -> inteiro) {
+    // Declaração de variável local
+    var resultado := a + b;
+
+    // Estrutura condicional 'se' e 'senao'
+    se (resultado > 100) {
+        retorna 1;
+    } senao {
+        retorna 0;
+    }
+}
+
+// Teste de loop 'enquanto'
+var contador := 10;
+enquanto (contador > 0) com (contador := contador - 1) {
+    // corpo do loop vazio
+}
+
+// Atribuições e operadores em sequência
+var a := 1;
+var b := 2;
+var c := 3;
+var _resultado_final := (a * b) + c / 2 % 1;
+
+
+// Seção 7: Casos de Borda (Edge Cases)
+// Testa situações que podem confundir um analisador léxico simples.
+
+// Palavras reservadas como parte de identificadores (devem ser TK_ID)
+variavel
+tipo_de_dado
+senao_se
+retornando
+
+// Operadores próximos uns dos outros
+x := 10 + -5; // Deve reconhecer +, depois -
+z > = y;      // Deve reconhecer >, depois = (diferente de >=)
+a<b == c>d;
+
+
+// -------------------------------------------------------------------
+// Seção 8: ERROS LÉXICOS
+// O programa deve parar e reportar um erro no primeiro caractere
+// inválido encontrado. Apenas o '@' na linha abaixo deve ser reportado.
+// -------------------------------------------------------------------
+
+@ // Caractere inválido, o programa deve terminar aqui.
+
+// O código abaixo nunca deve ser analisado.
+VARIAVEL_MAIUSCULA // Identificador inválido
+1.2.3              // Literal decimal mal formado
+$ # ?              // Outros caracteres inválidos

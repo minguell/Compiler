@@ -1,19 +1,22 @@
 #Augusto Mattei Grohmnann - 550429
 #Miguel Dutra Fontes Guerra - 342573 
 
+EXEC = etapa1
+
+LEX = flex
+LEX_SRC = scanner.l
+LEX_OUT = lex.yy.cpp
+
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS = -Wall -g
 
-target: etapa1
+all: $(EXEC)
 
-etapa1: lex.yy.o main.o
-	$(CXX) lex.yy.o main.o -o etapa1
+$(LEX_OUT): $(LEX_SRC)
+	$(LEX) -o $(LEX_OUT) $(LEX_SRC)
 
-%.o: %.cpp 
-	$(CXX) $(CXXFLAGS) $< -c
-
-lex.yy.cpp: scanner.l
-	flex -o lex.yy.cpp scanner.l 
+$(EXEC): $(LEX_OUT)
+	$(CXX) $(CXXFLAGS) $(LEX_OUT) -o $(EXEC)
 
 clean:
-	rm etapa1 lex.yy.cpp *.o
+	rm -f $(EXEC) $(LEX_OUT)

@@ -12,7 +12,7 @@
 %%
 
 [ \t\r\f\v\n]+      /* Ignora espaços, tabulações e linhas (contadas pelo yylineno) */          
-"//".*              /* Ignora comentários de uma linha */
+"//".*\n           /* Ignora comentários de uma linha */
 
 "tipo"              { return TK_TIPO; }
 "var"               { return TK_VAR; }
@@ -24,7 +24,7 @@
 "enquanto"          { return TK_ENQUANTO; }
 "com"               { return TK_COM; }
 
-[!*/%+-<>[\]()=,;&|] { return yytext[0]; }
+[!*/%<>[\]()=,;&|+-] { return yytext[0]; }
 
 "<="                { return TK_OC_LE; }
 ">="                { return TK_OC_GE; }
@@ -36,13 +36,16 @@
 [a-z_][a-z0-9_]*    { return TK_ID; }
 
 [0-9]+              { return TK_LI_INTEIRO; }
-[0-9]+"."[0-9]+     { return TK_LI_DECIMAL; }
+[0-9]*"."[0-9]+     { return TK_LI_DECIMAL; }
 
 .                   {return TK_ER; }
 
 %%
+#include "main.cpp"
 
 int get_line_number(void)
 {
     return yylineno;
 }
+
+
