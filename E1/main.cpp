@@ -1,6 +1,6 @@
-//Aluno: Miguel Dutra Fontes Guerra
-//Cartão UFRGS: 00342573
-
+/* Augusto Mattei Grohmnann - 550429
+ Miguel Dutra Fontes Guerra - 342573 */
+ 
 /*
   Programa principal de impressão de tokens.
   Este arquivo será posteriormente substituído.
