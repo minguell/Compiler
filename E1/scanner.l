@@ -25,7 +25,7 @@ int running = 1;
 "enquanto"          { return TK_ENQUANTO; }
 "com"               { return TK_COM; }
 
-[!*/%+-<>[]()=,;&|] { return yytext[0]; }
+[!*/%+-<>[\]()=,;&|] { return yytext[0]; }
 
 "<="                { return TK_OC_LE; }
 ">="                { return TK_OC_GE; }
@@ -39,6 +39,6 @@ int running = 1;
 [0-9]+              { return TK_LI_INTEIRO; }
 [0-9]+"."[0-9]+     { return TK_LI_DECIMAL; }
 
-.  {printf("Erro lexico na linha %d: caractere invalido '%s'\n", yyleno, yytext); return TK_ER; }
+.                   {return TK_ER; }
 
 %%
