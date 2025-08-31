@@ -1,0 +1,56 @@
+int a = 0;
+int x = 0;
+int y = 0;
+int vet[02];
+int p = 1;
+int n = 2;
+real vtfd = 0;
+real b1 = 1/2;
+real b2 = 2/2;
+real b4 = 5/5;
+real func_real(real a, real b, real c)
+{
+}
+byte func(int a, int b, int c)
+{
+}
+int func_index()
+{
+    return 1;
+}
+int main()
+{
+    if ((x > 1))
+    {
+        x = (a + p);
+    }
+    if ((x < 2))
+    {
+        vet[func_index()] = (a + p);
+    }
+    else
+    {
+        x = (a + p);
+    }
+    while ((n == 1)) do
+    {
+        vtfd = func_real(b1, b4, b2);
+        y = (((a + x) + p) + n);
+        vet[2] = 4;
+    }
+    x = 1;
+    do
+    {
+        print "a" "b" "c";
+        read y;
+        x = vet[1];
+        x = (vet[1] + vet[2]);
+        x = vet;
+        x = vet();
+        x = x[1];
+        x = x(y);
+        vet[3] = 2;
+    }
+    while ((x < 01));
+    return y;
+}

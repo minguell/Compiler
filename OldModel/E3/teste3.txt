@@ -1,0 +1,9 @@
+int y = 'c';
+byte z = 01;
+
+int teste(int a, byte b)
+{
+    aaaaaa = x + 10 * (fun() - fun2());
+
+    return aaaaaa;
+}

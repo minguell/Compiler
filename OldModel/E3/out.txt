@@ -1,0 +1,61 @@
+int x = 01;
+int y = 'a';
+byte _asd = 123445;
+byte _0123 = 'c';
+real sadnsfnidsfnad = 5/2;
+int vet_int[0011];
+int vet_int2[012] = 0, 0, 0, 0, 0;
+int vet_int3[123213213] = 'a', 'a', 'a', 'a';
+byte vet_byte[0011];
+byte vet_byte2[012] = 0, 0, 0, 0, 0;
+byte vet_byte3[123213213] = 'a', 'a', 'a', 'a';
+real vet_real1[func()] = 5/2;
+int func1()
+{
+    a = 0123;
+}
+byte func2()
+{
+    vet[01] = 'c';
+}
+real func3(int a, byte b, real c)
+{
+    print 'a' 'a' "asd" func_ima();
+    return 01;
+    return '0';
+    read _variavel;
+}
+int main()
+{
+    if ((x < 4))
+    y = func_imaginaria(a, 12);
+    if ((x < 4))
+    return a;
+    else
+    return d;
+    if ((ty == 'a'))
+    {
+        return x;
+        return wa;
+        print 'a' v 01 "asdasdas";
+    }
+    else
+    {
+        x = 31;
+        vet[32] = 'l';
+        y = func3213(vet[1]);
+    }
+    x = ((01 + 02) - (03 * 'a'));
+    while ((x < 02)) do
+    {
+        x = (x + 1);
+        print ".";
+    }
+    x = 1;
+    do
+    {
+        x = incn(x, 1);
+        y = incn(y, y);
+    }
+    while ((x < 01));
+}

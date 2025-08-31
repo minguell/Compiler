@@ -1,0 +1,78 @@
+int x = 0;
+int y = 0;
+int z = 0;
+int w = 0;
+int j = 0;
+int h = 0;
+int k = 0;
+int l = 0;
+int m = 0;
+int n = 0;
+int o = 0;
+int p = 0;
+int q = 0;
+int r = 0;
+int s = 0;
+int t = 0;
+
+int a = 0;
+int b = 0;
+int c = 0;
+int d = 0;
+int e = 0;
+int f = 0;
+int g = 0;
+int i = 0;
+
+int r1 = 0;
+int r2 = 0; 
+int r3 = 0;
+int r4 = 0;
+int res = 0;
+
+int cont = 000000001; // Invertido de 10000
+
+int main() 
+{
+    while (cont > 1) do
+    {
+    // Primeiro bloco de somas básicas (números invertidos)
+    x = 1 + 1 + 5 + 5;  // 10 → 1, 5 permanece 5 (não tem como inverter)
+    y = 2 + 2 + 1 + 1;  // 20 → 2, 10 → 1
+    z = 3 + 3 + 51 + 51; // 30 → 3, 15 → 51
+    w = 4 + 4 + 2 + 2;   // 40 → 4, 20 → 2
+    j = 5 + 5 + 52 + 52; // 50 → 5, 25 → 52
+    h = 6 + 6 + 3 + 3;   // 60 → 6, 30 → 3
+    k = 7 + 7 + 53 + 53; // 70 → 7, 35 → 53
+    l = 8 + 8 + 4 + 4;   // 80 → 8, 40 → 4
+    m = 9 + 9 + 54 + 54; // 90 → 9, 45 → 54
+    n = 1 + 1 + 5 + 5;   // 100 → 1, 50 → 5
+    o = 11 + 11 + 55 + 55; // 110 → 11, 55 → 55
+    p = 21 + 21 + 6 + 6;   // 120 → 21, 60 → 6
+    q = 31 + 31 + 56 + 56; // 130 → 31, 65 → 56
+    r = 41 + 41 + 7 + 7;   // 140 → 41, 70 → 7
+    s = 51 + 51 + 57 + 57; // 150 → 51, 75 → 57
+    t = 61 + 61 + 8 + 8;   // 160 → 61, 80 → 8
+
+    // Segundo bloco - somas intermediárias (variáveis permanecem as mesmas)
+    a = x + y + z + w;
+    b = j + h + k + l;
+    c = m + n + o + p;
+    d = q + r + s + t;
+    e = x + j + m + q;
+    f = y + h + n + r;
+    g = z + k + o + s;
+    i = w + l + p + t;
+
+    // Terceiro bloco - somas mais complexas
+    r1 = a + b + c + d;
+    r2 = e + f + g + i;
+    r3 = a + e + b + f;
+    r4 = c + g + d + i;
+
+    // Resultado final com múltiplas somas
+    res = r1 + r2 + r3 + r4 + x + y + z + w + j + h + k + l + m + n + o + p + q + r + s + t;
+    cont = cont - 1;
+    }
+    print res;
+}

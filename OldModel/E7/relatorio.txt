@@ -1,0 +1,270 @@
+//Aluno: Miguel Dutra Fontes Guerra
+//Cartão UFRGS: 00342573
+--------------------------------------------------------------------------------------------------------------
+Os experimentos foram executados em uma máquina virtual (VirtualBox) hospedada em 
+um servidor com processador Intel® 11th Gen CoreTM i7–11390H @ 3.40 GHz. A VM es-
+tava configurada com 3 vCPUs e 6,5 GiB de RAM. Software. Ubuntu 24.04.2 LTS, ker-
+nel Linux 6.11.0–26–generic.
+--------------------------------------------------------------------------------------------------------------
+Para os experimentos foram utilizados quatro arquivos de teste, cada um com finalidades diferentes, em formato de
+.txt para ver o resultado individual deles com o arquivo modelo out.txt, que se altera para cada um dos testes
+da linguagem 2025++1.
+--------------------------------------------------------------------------------------------------------------
+
+miguel@miguel-VirtualBox:~/COMPILADORES/etapa7$ ./etapa7 teste.txt out.txt
+
+QUANTIDADE DE ERROS SINTÁTICOS: 0
+
+ERROS SEMANTICOS:
+
+PROGRAMA COMPILADO SEM ERROS SINTATICOS!
+PROGRAMA COMPILADO SEM ERROS SEMANTICOS!
+
+
+
+TAC
+
+
+
+Numero de estados da TAC: 3
+
+QUANTIDADE DE LINHAS: 3
+
+COMPILAÇÃO CONCLUÍDA!
+
+
+--------------------------------------------------------------------------------------------------------------
+miguel@miguel-VirtualBox:~/COMPILADORES/etapa7$ ./etapa7 teste2.txt out.txt
+
+QUANTIDADE DE ERROS SINTÁTICOS: 0
+
+ERROS SEMANTICOS:
+
+PROGRAMA COMPILADO SEM ERROS SINTATICOS!
+PROGRAMA COMPILADO SEM ERROS SEMANTICOS!
+
+
+
+TAC
+
+
+TAC(TAC_BEGINFUN,func,,)
+TAC(TAC_ADD,______Temp_____var_0,a,b)
+TAC(TAC_ADD,______Temp_____var_1,______Temp_____var_0,c)
+TAC(TAC_RET,______Temp_____var_1,,)
+TAC(TAC_ENDFUN,func,,)
+TAC(TAC_BEGINFUN,func_real,,)
+TAC(TAC_ADD,______Temp_____var_2,r1,r2)
+TAC(TAC_RET,______Temp_____var_2,,)
+TAC(TAC_ENDFUN,func_real,,)
+TAC(TAC_BEGINFUN,main,,)
+TAC(TAC_ARG,real1,,)
+TAC(TAC_ARG,real2,,)
+TAC(TAC_CALL,______Temp_____var_3,func_real,)
+TAC(TAC_PRINT,______Temp_____var_3,,)
+TAC(TAC_ARG,arg1,,)
+TAC(TAC_ARG,arg2,,)
+TAC(TAC_ARG,arg3,,)
+TAC(TAC_CALL,______Temp_____var_4,func,)
+TAC(TAC_PRINT,______Temp_____var_4,,)
+TAC(TAC_ARG,arg1,,)
+TAC(TAC_ARG,arg2,,)
+TAC(TAC_ARG,arg3,,)
+TAC(TAC_CALL,______Temp_____var_5,func,)
+TAC(TAC_COPY,x,______Temp_____var_5,)
+TAC(TAC_PRINT,x,,)
+TAC(TAC_VET_LOAD,______Temp_____var_6,vet2,x)
+TAC(TAC_PRINT,______Temp_____var_6,,)
+TAC(TAC_ARG,arg1,,)
+TAC(TAC_ARG,arg2,,)
+TAC(TAC_ARG,arg3,,)
+TAC(TAC_CALL,______Temp_____var_7,func,)
+TAC(TAC_VET_LOAD,______Temp_____var_8,vet2,______Temp_____var_7)
+TAC(TAC_PRINT,______Temp_____var_8,,)
+TAC(TAC_RET,0,,)
+TAC(TAC_ENDFUN,main,,)
+
+Numero de estados da TAC: 72
+
+QUANTIDADE DE LINHAS: 56
+
+COMPILAÇÃO CONCLUÍDA!
+--------------------------------------------------------------------------------------------------------------
+miguel@miguel-VirtualBox:~/COMPILADORES/etapa7$ ./etapa7 teste3.txt out.txt
+ERRO DE SINTAXE NA linha 7 - syntax error
+ERRO DE SINTAXE NA linha 7 - Comando inválido. Recuperado até ;
+ERRO DE SINTAXE NA linha 10 - syntax error
+ERRO DE SINTAXE NA linha 10 - Comando inválido. Recuperado até ;
+
+QUANTIDADE DE ERROS SINTÁTICOS: 2
+
+ERROS SEMANTICOS:
+
+Erro Semantico: w não declarado
+
+ATENÇÃO: Erros de sintaxe encontrados. A geração de código foi interrompida.
+
+--------------------------------------------------------------------------------------------------------------
+miguel@miguel-VirtualBox:~/COMPILADORES/etapa7$ ./etapa7 teste4.txt out.txt
+
+QUANTIDADE DE ERROS SINTÁTICOS: 0
+
+ERROS SEMANTICOS:
+
+PROGRAMA COMPILADO SEM ERROS SINTATICOS!
+PROGRAMA COMPILADO SEM ERROS SEMANTICOS!
+
+
+
+TAC
+
+
+TAC(TAC_BEGINFUN,main,,)
+TAC(TAC_LABEL,______Label_____var_0,,)
+TAC(TAC_GRT,______Temp_____var_0,cont,1)
+TAC(TAC_JFALSE,______Label_____var_1,______Temp_____var_0,)
+TAC(TAC_ADD,______Temp_____var_1,1,1)
+TAC(TAC_ADD,______Temp_____var_2,______Temp_____var_1,5)
+TAC(TAC_ADD,______Temp_____var_3,______Temp_____var_2,5)
+TAC(TAC_COPY,x,______Temp_____var_3,)
+TAC(TAC_ADD,______Temp_____var_4,2,2)
+TAC(TAC_ADD,______Temp_____var_5,______Temp_____var_4,1)
+TAC(TAC_ADD,______Temp_____var_6,______Temp_____var_5,1)
+TAC(TAC_COPY,y,______Temp_____var_6,)
+TAC(TAC_ADD,______Temp_____var_7,3,3)
+TAC(TAC_ADD,______Temp_____var_8,______Temp_____var_7,51)
+TAC(TAC_ADD,______Temp_____var_9,______Temp_____var_8,51)
+TAC(TAC_COPY,z,______Temp_____var_9,)
+TAC(TAC_ADD,______Temp_____var_10,4,4)
+TAC(TAC_ADD,______Temp_____var_11,______Temp_____var_10,2)
+TAC(TAC_ADD,______Temp_____var_12,______Temp_____var_11,2)
+TAC(TAC_COPY,w,______Temp_____var_12,)
+TAC(TAC_ADD,______Temp_____var_13,5,5)
+TAC(TAC_ADD,______Temp_____var_14,______Temp_____var_13,52)
+TAC(TAC_ADD,______Temp_____var_15,______Temp_____var_14,52)
+TAC(TAC_COPY,j,______Temp_____var_15,)
+TAC(TAC_ADD,______Temp_____var_16,6,6)
+TAC(TAC_ADD,______Temp_____var_17,______Temp_____var_16,3)
+TAC(TAC_ADD,______Temp_____var_18,______Temp_____var_17,3)
+TAC(TAC_COPY,h,______Temp_____var_18,)
+TAC(TAC_ADD,______Temp_____var_19,7,7)
+TAC(TAC_ADD,______Temp_____var_20,______Temp_____var_19,53)
+TAC(TAC_ADD,______Temp_____var_21,______Temp_____var_20,53)
+TAC(TAC_COPY,k,______Temp_____var_21,)
+TAC(TAC_ADD,______Temp_____var_22,8,8)
+TAC(TAC_ADD,______Temp_____var_23,______Temp_____var_22,4)
+TAC(TAC_ADD,______Temp_____var_24,______Temp_____var_23,4)
+TAC(TAC_COPY,l,______Temp_____var_24,)
+TAC(TAC_ADD,______Temp_____var_25,9,9)
+TAC(TAC_ADD,______Temp_____var_26,______Temp_____var_25,54)
+TAC(TAC_ADD,______Temp_____var_27,______Temp_____var_26,54)
+TAC(TAC_COPY,m,______Temp_____var_27,)
+TAC(TAC_ADD,______Temp_____var_28,1,1)
+TAC(TAC_ADD,______Temp_____var_29,______Temp_____var_28,5)
+TAC(TAC_ADD,______Temp_____var_30,______Temp_____var_29,5)
+TAC(TAC_COPY,n,______Temp_____var_30,)
+TAC(TAC_ADD,______Temp_____var_31,11,11)
+TAC(TAC_ADD,______Temp_____var_32,______Temp_____var_31,55)
+TAC(TAC_ADD,______Temp_____var_33,______Temp_____var_32,55)
+TAC(TAC_COPY,o,______Temp_____var_33,)
+TAC(TAC_ADD,______Temp_____var_34,21,21)
+TAC(TAC_ADD,______Temp_____var_35,______Temp_____var_34,6)
+TAC(TAC_ADD,______Temp_____var_36,______Temp_____var_35,6)
+TAC(TAC_COPY,p,______Temp_____var_36,)
+TAC(TAC_ADD,______Temp_____var_37,31,31)
+TAC(TAC_ADD,______Temp_____var_38,______Temp_____var_37,56)
+TAC(TAC_ADD,______Temp_____var_39,______Temp_____var_38,56)
+TAC(TAC_COPY,q,______Temp_____var_39,)
+TAC(TAC_ADD,______Temp_____var_40,41,41)
+TAC(TAC_ADD,______Temp_____var_41,______Temp_____var_40,7)
+TAC(TAC_ADD,______Temp_____var_42,______Temp_____var_41,7)
+TAC(TAC_COPY,r,______Temp_____var_42,)
+TAC(TAC_ADD,______Temp_____var_43,51,51)
+TAC(TAC_ADD,______Temp_____var_44,______Temp_____var_43,57)
+TAC(TAC_ADD,______Temp_____var_45,______Temp_____var_44,57)
+TAC(TAC_COPY,s,______Temp_____var_45,)
+TAC(TAC_ADD,______Temp_____var_46,61,61)
+TAC(TAC_ADD,______Temp_____var_47,______Temp_____var_46,8)
+TAC(TAC_ADD,______Temp_____var_48,______Temp_____var_47,8)
+TAC(TAC_COPY,t,______Temp_____var_48,)
+TAC(TAC_ADD,______Temp_____var_49,x,y)
+TAC(TAC_ADD,______Temp_____var_50,______Temp_____var_49,z)
+TAC(TAC_ADD,______Temp_____var_51,______Temp_____var_50,w)
+TAC(TAC_COPY,a,______Temp_____var_51,)
+TAC(TAC_ADD,______Temp_____var_52,j,h)
+TAC(TAC_ADD,______Temp_____var_53,______Temp_____var_52,k)
+TAC(TAC_ADD,______Temp_____var_54,______Temp_____var_53,l)
+TAC(TAC_COPY,b,______Temp_____var_54,)
+TAC(TAC_ADD,______Temp_____var_55,m,n)
+TAC(TAC_ADD,______Temp_____var_56,______Temp_____var_55,o)
+TAC(TAC_ADD,______Temp_____var_57,______Temp_____var_56,p)
+TAC(TAC_COPY,c,______Temp_____var_57,)
+TAC(TAC_ADD,______Temp_____var_58,q,r)
+TAC(TAC_ADD,______Temp_____var_59,______Temp_____var_58,s)
+TAC(TAC_ADD,______Temp_____var_60,______Temp_____var_59,t)
+TAC(TAC_COPY,d,______Temp_____var_60,)
+TAC(TAC_ADD,______Temp_____var_61,x,j)
+TAC(TAC_ADD,______Temp_____var_62,______Temp_____var_61,m)
+TAC(TAC_ADD,______Temp_____var_63,______Temp_____var_62,q)
+TAC(TAC_COPY,e,______Temp_____var_63,)
+TAC(TAC_ADD,______Temp_____var_64,y,h)
+TAC(TAC_ADD,______Temp_____var_65,______Temp_____var_64,n)
+TAC(TAC_ADD,______Temp_____var_66,______Temp_____var_65,r)
+TAC(TAC_COPY,f,______Temp_____var_66,)
+TAC(TAC_ADD,______Temp_____var_67,z,k)
+TAC(TAC_ADD,______Temp_____var_68,______Temp_____var_67,o)
+TAC(TAC_ADD,______Temp_____var_69,______Temp_____var_68,s)
+TAC(TAC_COPY,g,______Temp_____var_69,)
+TAC(TAC_ADD,______Temp_____var_70,w,l)
+TAC(TAC_ADD,______Temp_____var_71,______Temp_____var_70,p)
+TAC(TAC_ADD,______Temp_____var_72,______Temp_____var_71,t)
+TAC(TAC_COPY,i,______Temp_____var_72,)
+TAC(TAC_ADD,______Temp_____var_73,a,b)
+TAC(TAC_ADD,______Temp_____var_74,______Temp_____var_73,c)
+TAC(TAC_ADD,______Temp_____var_75,______Temp_____var_74,d)
+TAC(TAC_COPY,r1,______Temp_____var_75,)
+TAC(TAC_ADD,______Temp_____var_76,e,f)
+TAC(TAC_ADD,______Temp_____var_77,______Temp_____var_76,g)
+TAC(TAC_ADD,______Temp_____var_78,______Temp_____var_77,i)
+TAC(TAC_COPY,r2,______Temp_____var_78,)
+TAC(TAC_ADD,______Temp_____var_79,a,e)
+TAC(TAC_ADD,______Temp_____var_80,______Temp_____var_79,b)
+TAC(TAC_ADD,______Temp_____var_81,______Temp_____var_80,f)
+TAC(TAC_COPY,r3,______Temp_____var_81,)
+TAC(TAC_ADD,______Temp_____var_82,c,g)
+TAC(TAC_ADD,______Temp_____var_83,______Temp_____var_82,d)
+TAC(TAC_ADD,______Temp_____var_84,______Temp_____var_83,i)
+TAC(TAC_COPY,r4,______Temp_____var_84,)
+TAC(TAC_ADD,______Temp_____var_85,r1,r2)
+TAC(TAC_ADD,______Temp_____var_86,______Temp_____var_85,r3)
+TAC(TAC_ADD,______Temp_____var_87,______Temp_____var_86,r4)
+TAC(TAC_ADD,______Temp_____var_88,______Temp_____var_87,x)
+TAC(TAC_ADD,______Temp_____var_89,______Temp_____var_88,y)
+TAC(TAC_ADD,______Temp_____var_90,______Temp_____var_89,z)
+TAC(TAC_ADD,______Temp_____var_91,______Temp_____var_90,w)
+TAC(TAC_ADD,______Temp_____var_92,______Temp_____var_91,j)
+TAC(TAC_ADD,______Temp_____var_93,______Temp_____var_92,h)
+TAC(TAC_ADD,______Temp_____var_94,______Temp_____var_93,k)
+TAC(TAC_ADD,______Temp_____var_95,______Temp_____var_94,l)
+TAC(TAC_ADD,______Temp_____var_96,______Temp_____var_95,m)
+TAC(TAC_ADD,______Temp_____var_97,______Temp_____var_96,n)
+TAC(TAC_ADD,______Temp_____var_98,______Temp_____var_97,o)
+TAC(TAC_ADD,______Temp_____var_99,______Temp_____var_98,p)
+TAC(TAC_ADD,______Temp_____var_100,______Temp_____var_99,q)
+TAC(TAC_ADD,______Temp_____var_101,______Temp_____var_100,r)
+TAC(TAC_ADD,______Temp_____var_102,______Temp_____var_101,s)
+TAC(TAC_ADD,______Temp_____var_103,______Temp_____var_102,t)
+TAC(TAC_COPY,res,______Temp_____var_103,)
+TAC(TAC_SUB,______Temp_____var_104,cont,1)
+TAC(TAC_COPY,cont,______Temp_____var_104,)
+TAC(TAC_JUMP,______Label_____var_0,,)
+TAC(TAC_LABEL,______Label_____var_1,,)
+TAC(TAC_PRINT,res,,)
+TAC(TAC_ENDFUN,main,,)
+
+Numero de estados da TAC: 309
+
+QUANTIDADE DE LINHAS: 78
+
+COMPILAÇÃO CONCLUÍDA!
+--------------------------------------------------------------------------------------------------------------

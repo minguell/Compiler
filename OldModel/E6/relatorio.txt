@@ -1,0 +1,523 @@
+//Aluno: Miguel Dutra Fontes Guerra
+//Cartão UFRGS: 00342573
+
+--------------------------------------------------------------------------------------------------------------
+Os experimentos foram executados em uma máquina virtual (VirtualBox) hospedada em 
+um servidor com processador Intel® 11th Gen CoreTM i7–11390H @ 3.40 GHz. A VM es-
+tava configurada com 3 vCPUs e 6,5 GiB de RAM. Software. Ubuntu 24.04.2 LTS, ker-
+nel Linux 6.11.0–26–generic.
+
+--------------------------------------------------------------------------------------------------------------
+Para os experimentos foram utilizados dois diferentes arquivos de teste, cada um com sua própria finalidade e 
+saída, em formato de .txt para avaliar os seus resultados com o arquivo modelo out.txt, que é alterado para 
+cada um dos testes baseados na  linguagem 2025++1. Segue abaixo cada um dos logs de saída no terminal com
+o executável.
+
+--------------------------------------------------------------------------------------------------------------
+
+
+miguel@miguel-VirtualBox:~/COMPILADORES/etapa6$ ./etapa6 teste.txt out2.txt
+AST: AST_LDECL,  
+  AST: AST_INT_VARDEC, a 
+    AST: AST_SYMBOL, 0 
+  AST: AST_LDECL,  
+    AST: AST_INT_VARDEC, x 
+      AST: AST_SYMBOL, 0 
+    AST: AST_LDECL,  
+      AST: AST_INT_VARDEC, y 
+        AST: AST_SYMBOL, 0 
+      AST: AST_LDECL,  
+        AST: AST_INT_VETDEC_VAZIO, vet 
+          AST: AST_SYMBOL, 02 
+        AST: AST_LDECL,  
+          AST: AST_INT_VARDEC, char1 
+            AST: AST_SYMBOL, 'a' 
+          AST: AST_LDECL,  
+            AST: AST_INT_VARDEC, char2 
+              AST: AST_SYMBOL, 'b' 
+            AST: AST_LDECL,  
+              AST: AST_INT_VARDEC, char3 
+                AST: AST_SYMBOL, 'c' 
+              AST: AST_LDECL,  
+                AST: AST_INT_VARDEC, p 
+                  AST: AST_SYMBOL, 1 
+                AST: AST_LDECL,  
+                  AST: AST_INT_VARDEC, n 
+                    AST: AST_SYMBOL, 2 
+                  AST: AST_LDECL,  
+                    AST: AST_REAL_VARDEC, vtfd 
+                      AST: AST_SYMBOL, 0 
+                    AST: AST_LDECL,  
+                      AST: AST_REAL_VARDEC, b1 
+                        AST: AST_SYMBOL, 1/2 
+                      AST: AST_LDECL,  
+                        AST: AST_REAL_VARDEC, b2 
+                          AST: AST_SYMBOL, 2/2 
+                        AST: AST_LDECL,  
+                          AST: AST_REAL_VARDEC, b4 
+                            AST: AST_SYMBOL, 5/5 
+                          AST: AST_LDECL,  
+                            AST: AST_REAL_FUNDEC, func_real 
+                              AST: AST_PAR_LIST,  
+                                AST: AST_PAR_REAL_SYMBOL, a 
+                                AST: AST_PAR_LIST,  
+                                  AST: AST_PAR_REAL_SYMBOL, b 
+                                  AST: AST_PAR_REAL_SYMBOL, c 
+                              AST: AST_CMD_BLOCK,  
+                            AST: AST_LDECL,  
+                              AST: AST_BYTE_FUNDEC, func 
+                                AST: AST_PAR_LIST,  
+                                  AST: AST_PAR_INT_SYMBOL, a 
+                                  AST: AST_PAR_LIST,  
+                                    AST: AST_PAR_INT_SYMBOL, b 
+                                    AST: AST_PAR_INT_SYMBOL, c 
+                                AST: AST_CMD_BLOCK,  
+                              AST: AST_LDECL,  
+                                AST: AST_INT_FUNDEC, func_index 
+                                  AST: AST_CMD_BLOCK,  
+                                    AST: AST_CMD_LIST,  
+                                      AST: AST_RETURN,  
+                                        AST: AST_SYMBOL, 1 
+                                AST: AST_LDECL,  
+                                  AST: AST_INT_FUNDEC, main 
+                                    AST: AST_CMD_BLOCK,  
+                                      AST: AST_CMD_LIST,  
+                                        AST: AST_IF_THEN,  
+                                          AST: AST_GRT,  
+                                            AST: AST_SYMBOL, x 
+                                            AST: AST_SYMBOL, 1 
+                                          AST: AST_CMD_BLOCK,  
+                                            AST: AST_CMD_LIST,  
+                                              AST: AST_ASSIGNMENT, x 
+                                                AST: AST_ADD,  
+                                                  AST: AST_SYMBOL, a 
+                                                  AST: AST_SYMBOL, p 
+                                        AST: AST_CMD_LIST,  
+                                          AST: AST_IF_THEN_ELSE,  
+                                            AST: AST_LESS,  
+                                              AST: AST_SYMBOL, x 
+                                              AST: AST_SYMBOL, 2 
+                                            AST: AST_CMD_BLOCK,  
+                                              AST: AST_CMD_LIST,  
+                                                AST: AST_VET_ASSIGNMENT, vet 
+                                                  AST: AST_SYMBOL_FUNC, func_index 
+                                                  AST: AST_ADD,  
+                                                    AST: AST_SYMBOL, a 
+                                                    AST: AST_SYMBOL, p 
+                                            AST: AST_CMD_BLOCK,  
+                                              AST: AST_CMD_LIST,  
+                                                AST: AST_ASSIGNMENT, x 
+                                                  AST: AST_ADD,  
+                                                    AST: AST_SYMBOL, a 
+                                                    AST: AST_SYMBOL, p 
+                                          AST: AST_CMD_LIST,  
+                                            AST: AST_WHILE,  
+                                              AST: AST_EQUAL,  
+                                                AST: AST_SYMBOL, n 
+                                                AST: AST_SYMBOL, 1 
+                                              AST: AST_CMD_BLOCK,  
+                                                AST: AST_CMD_LIST,  
+                                                  AST: AST_ASSIGNMENT, vtfd 
+                                                    AST: AST_SYMBOL_FUNC, func_real 
+                                                      AST: AST_EXP_LIST,  
+                                                        AST: AST_SYMBOL, b1 
+                                                        AST: AST_EXP_LIST,  
+                                                          AST: AST_SYMBOL, b4 
+                                                          AST: AST_EXP_LIST,  
+                                                            AST: AST_SYMBOL, b2 
+                                                  AST: AST_CMD_LIST,  
+                                                    AST: AST_ASSIGNMENT, y 
+                                                      AST: AST_ADD,  
+                                                        AST: AST_ADD,  
+                                                          AST: AST_ADD,  
+                                                            AST: AST_SYMBOL, a 
+                                                            AST: AST_SYMBOL, x 
+                                                          AST: AST_SYMBOL, p 
+                                                        AST: AST_SYMBOL, n 
+                                                    AST: AST_CMD_LIST,  
+                                                      AST: AST_VET_ASSIGNMENT, vet 
+                                                        AST: AST_SYMBOL, 2 
+                                                        AST: AST_SYMBOL, 4 
+                                            AST: AST_CMD_LIST,  
+                                              AST: AST_ASSIGNMENT, x 
+                                                AST: AST_SYMBOL, 1 
+                                              AST: AST_CMD_LIST,  
+                                                AST: AST_DO_WHILE,  
+                                                  AST: AST_CMD_BLOCK,  
+                                                    AST: AST_CMD_LIST,  
+                                                      AST: AST_PRINT,  
+                                                        AST: AST_PRINT_LIST,  
+                                                          AST: AST_SYMBOL, "a" 
+                                                          AST: AST_PRINT_LIST,  
+                                                            AST: AST_SYMBOL, "b" 
+                                                            AST: AST_PRINT_LIST,  
+                                                              AST: AST_SYMBOL, "c" 
+                                                      AST: AST_CMD_LIST,  
+                                                        AST: AST_READ, y 
+                                                        AST: AST_CMD_LIST,  
+                                                          AST: AST_ASSIGNMENT, x 
+                                                            AST: AST_SYMBOL_VEC, vet 
+                                                              AST: AST_SYMBOL, 1 
+                                                          AST: AST_CMD_LIST,  
+                                                            AST: AST_ASSIGNMENT, x 
+                                                              AST: AST_ADD,  
+                                                                AST: AST_SYMBOL_VEC, vet 
+                                                                  AST: AST_SYMBOL, 1 
+                                                                AST: AST_SYMBOL_VEC, vet 
+                                                                  AST: AST_SYMBOL, 2 
+                                                            AST: AST_CMD_LIST,  
+                                                              AST: AST_VET_ASSIGNMENT, vet 
+                                                                AST: AST_SYMBOL, 5 
+                                                                AST: AST_SYMBOL, 123 
+                                                              AST: AST_CMD_LIST,  
+                                                                AST: AST_VET_ASSIGNMENT, vet 
+                                                                  AST: AST_SYMBOL, 3 
+                                                                  AST: AST_SYMBOL, 2 
+                                                  AST: AST_LESS,  
+                                                    AST: AST_SYMBOL, x 
+                                                    AST: AST_SYMBOL, 01 
+                                                AST: AST_CMD_LIST,  
+                                                  AST: AST_RETURN,  
+                                                    AST: AST_SYMBOL, y 
+
+Semantic ERROR: Operando esquerdo inválido para operação aritmética ADD
+Semantic ERROR: Operando direito inválido para operação aritmética ADD
+
+TAC:
+
+TAC(TAC_ENDFUN,main,,)
+TAC(TAC_RET,y,,)
+TAC(TAC_LABEL,______Label_____var_6,,)
+TAC(TAC_JUMP,______Label_____var_5,,)
+TAC(TAC_JFALSE,______Label_____var_6,______Temp_____var_15,)
+TAC(TAC_LESS,______Temp_____var_15,x,01)
+TAC(TAC_VET_STORE,vet,3,2)
+TAC(TAC_VET_STORE,vet,5,123)
+TAC(TAC_COPY,x,______Temp_____var_14,)
+TAC(TAC_ADD,______Temp_____var_14,______Temp_____var_12,______Temp_____var_13)
+TAC(TAC_VET_LOAD,______Temp_____var_13,vet,2)
+TAC(TAC_VET_LOAD,______Temp_____var_12,vet,1)
+TAC(TAC_COPY,x,______Temp_____var_11,)
+TAC(TAC_VET_LOAD,______Temp_____var_11,vet,1)
+TAC(TAC_READ,y,,)
+TAC(TAC_PRINT,"c",,)
+TAC(TAC_PRINT,"b",,)
+TAC(TAC_PRINT,"a",,)
+TAC(TAC_LABEL,______Label_____var_5,,)
+TAC(TAC_COPY,x,1,)
+TAC(TAC_LABEL,______Label_____var_4,,)
+TAC(TAC_JUMP,______Label_____var_3,,)
+TAC(TAC_VET_STORE,vet,2,4)
+TAC(TAC_COPY,y,______Temp_____var_10,)
+TAC(TAC_ADD,______Temp_____var_10,______Temp_____var_9,n)
+TAC(TAC_ADD,______Temp_____var_9,______Temp_____var_8,p)
+TAC(TAC_ADD,______Temp_____var_8,a,x)
+TAC(TAC_COPY,vtfd,______Temp_____var_7,)
+TAC(TAC_CALL,______Temp_____var_7,func_real,)
+TAC(TAC_ARG,b2,,)
+TAC(TAC_ARG,b4,,)
+TAC(TAC_ARG,b1,,)
+TAC(TAC_JFALSE,______Label_____var_4,______Temp_____var_6,)
+TAC(TAC_EQUAL,______Temp_____var_6,n,1)
+TAC(TAC_LABEL,______Label_____var_3,,)
+TAC(TAC_LABEL,______Label_____var_2,,)
+TAC(TAC_COPY,x,______Temp_____var_5,)
+TAC(TAC_ADD,______Temp_____var_5,a,p)
+TAC(TAC_LABEL,______Label_____var_1,,)
+TAC(TAC_JUMP,______Label_____var_2,,)
+TAC(TAC_VET_STORE,vet,______Temp_____var_3,______Temp_____var_4)
+TAC(TAC_ADD,______Temp_____var_4,a,p)
+TAC(TAC_CALL,______Temp_____var_3,func_index,)
+TAC(TAC_JFALSE,______Label_____var_1,______Temp_____var_2,)
+TAC(TAC_LESS,______Temp_____var_2,x,2)
+TAC(TAC_LABEL,______Label_____var_0,,)
+TAC(TAC_COPY,x,______Temp_____var_1,)
+TAC(TAC_ADD,______Temp_____var_1,a,p)
+TAC(TAC_JFALSE,______Label_____var_0,______Temp_____var_0,)
+TAC(TAC_GRT,______Temp_____var_0,x,1)
+TAC(TAC_BEGINFUN,main,,)
+TAC(TAC_ENDFUN,func_index,,)
+TAC(TAC_RET,1,,)
+TAC(TAC_BEGINFUN,func_index,,)
+TAC(TAC_ENDFUN,func,,)
+TAC(TAC_BEGINFUN,func,,)
+TAC(TAC_ENDFUN,func_real,,)
+TAC(TAC_BEGINFUN,func_real,,)
+
+QUANTIDADE DE LINHAS: 80
+
+
+TABELA DE SÍMBOLOS:
+Symbol[SYMBOL_LIT_STRING,"a",STRING,0]
+Symbol[SYMBOL_LIT_STRING,"b",STRING,0]
+Symbol[SYMBOL_LIT_STRING,"c",STRING,0]
+Symbol[SYMBOL_LIT_CHAR,'a',CHAR,0]
+Symbol[SYMBOL_LIT_CHAR,'b',CHAR,0]
+Symbol[SYMBOL_LIT_CHAR,'c',CHAR,0]
+Symbol[SYMBOL_LIT_INT,0,INT,0]
+Symbol[SYMBOL_LIT_INT,01,INT,0]
+Symbol[SYMBOL_LIT_INT,02,INT,0]
+Symbol[SYMBOL_LIT_INT,1,INT,0]
+Symbol[SYMBOL_LIT_REAL,1/2,REAL,0]
+Symbol[SYMBOL_LIT_INT,123,INT,0]
+Symbol[SYMBOL_LIT_INT,2,INT,0]
+Symbol[SYMBOL_LIT_REAL,2/2,REAL,0]
+Symbol[SYMBOL_LIT_INT,3,INT,0]
+Symbol[SYMBOL_LIT_INT,4,INT,0]
+Symbol[SYMBOL_LIT_INT,5,INT,0]
+Symbol[SYMBOL_LIT_REAL,5/5,REAL,0]
+Symbol[SYMBOL_ID,______Label_____var_0,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_1,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_2,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_3,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_4,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_5,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_6,STRING,0]
+Symbol[SYMBOL_ID,______Temp_____var_0,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_1,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_10,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_11,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_12,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_13,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_14,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_15,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_2,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_3,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_4,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_5,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_6,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_7,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_8,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_9,REAL,0]
+Symbol[FUNC_PAR,a,INT,0]
+Symbol[FUNC_PAR,b,INT,0]
+Symbol[VAR,b1,REAL,0]
+Symbol[VAR,b2,REAL,0]
+Symbol[VAR,b4,REAL,0]
+Symbol[FUNC_PAR,c,INT,0]
+Symbol[VAR,char1,INT,0]
+Symbol[VAR,char2,INT,0]
+Symbol[VAR,char3,INT,0]
+Symbol[FUNC,func,BYTE,0]
+Symbol[FUNC,func_index,INT,0]
+Symbol[FUNC,func_real,REAL,0]
+Symbol[FUNC,main,INT,0]
+Symbol[VAR,n,INT,0]
+Symbol[VAR,p,INT,0]
+Symbol[VET,vet,INT,0]
+Symbol[VAR,vtfd,REAL,0]
+Symbol[VAR,x,INT,0]
+Symbol[VAR,y,INT,0]
+
+
+Erros semanticos existentes: 2
+--------------------------------------------------------------------------------------------------------------
+
+
+miguel@miguel-VirtualBox:~/COMPILADORES/etapa6$ ./etapa6 teste2.txt out2.txt
+AST: AST_LDECL,  
+  AST: AST_INT_VARDEC, x 
+    AST: AST_SYMBOL, 1324 
+  AST: AST_LDECL,  
+    AST: AST_INT_VARDEC, x1 
+      AST: AST_SYMBOL, 'd' 
+    AST: AST_LDECL,  
+      AST: AST_BYTE_VARDEC, y 
+        AST: AST_SYMBOL, 323 
+      AST: AST_LDECL,  
+        AST: AST_INT_VARDEC, z 
+          AST: AST_SYMBOL, 0 
+        AST: AST_LDECL,  
+          AST: AST_INT_VARDEC, w 
+            AST: AST_SYMBOL, 3 
+          AST: AST_LDECL,  
+            AST: AST_INT_VARDEC, arg1 
+              AST: AST_SYMBOL, 1 
+            AST: AST_LDECL,  
+              AST: AST_INT_VARDEC, arg2 
+                AST: AST_SYMBOL, 2 
+              AST: AST_LDECL,  
+                AST: AST_INT_VARDEC, arg3 
+                  AST: AST_SYMBOL, 1 
+                AST: AST_LDECL,  
+                  AST: AST_INT_VETDEC_VAZIO, vet1 
+                    AST: AST_SYMBOL, 01 
+                  AST: AST_LDECL,  
+                    AST: AST_INT_VETDEC, vet2 
+                      AST: AST_SYMBOL, 5 
+                      AST: AST_EXPR_VET_ELEM,  
+                        AST: AST_SYMBOL, 1 
+                        AST: AST_EXPR_VET_ELEM,  
+                          AST: AST_SYMBOL, 2 
+                          AST: AST_EXPR_VET_ELEM,  
+                            AST: AST_SYMBOL, 3 
+                            AST: AST_EXPR_VET_ELEM,  
+                              AST: AST_SYMBOL, 4 
+                              AST: AST_SYMBOL, 5 
+                    AST: AST_LDECL,  
+                      AST: AST_REAL_VARDEC, realzin 
+                        AST: AST_SYMBOL, 1234123/12 
+                      AST: AST_LDECL,  
+                        AST: AST_REAL_VARDEC, real1 
+                          AST: AST_SYMBOL, 1/2 
+                        AST: AST_LDECL,  
+                          AST: AST_REAL_VARDEC, real2 
+                            AST: AST_SYMBOL, 3/5 
+                          AST: AST_LDECL,  
+                            AST: AST_INT_FUNDEC, func 
+                              AST: AST_PAR_LIST,  
+                                AST: AST_PAR_INT_SYMBOL, a 
+                                AST: AST_PAR_LIST,  
+                                  AST: AST_PAR_INT_SYMBOL, b 
+                                  AST: AST_PAR_INT_SYMBOL, c 
+                              AST: AST_CMD_BLOCK,  
+                                AST: AST_CMD_LIST,  
+                                  AST: AST_RETURN,  
+                                    AST: AST_ADD,  
+                                      AST: AST_ADD,  
+                                        AST: AST_SYMBOL, a 
+                                        AST: AST_SYMBOL, b 
+                                      AST: AST_SYMBOL, c 
+                            AST: AST_LDECL,  
+                              AST: AST_REAL_FUNDEC, func_real 
+                                AST: AST_PAR_LIST,  
+                                  AST: AST_PAR_REAL_SYMBOL, r1 
+                                  AST: AST_PAR_REAL_SYMBOL, r2 
+                                AST: AST_CMD_BLOCK,  
+                                  AST: AST_CMD_LIST,  
+                                    AST: AST_RETURN,  
+                                      AST: AST_ADD,  
+                                        AST: AST_SYMBOL, r1 
+                                        AST: AST_SYMBOL, r2 
+                              AST: AST_LDECL,  
+                                AST: AST_INT_FUNDEC, main 
+                                  AST: AST_CMD_BLOCK,  
+                                    AST: AST_CMD_LIST,  
+                                      AST: AST_WHILE,  
+                                        AST: AST_LESS,  
+                                          AST: AST_SYMBOL, z 
+                                          AST: AST_SYMBOL, 001 
+                                        AST: AST_CMD_BLOCK,  
+                                          AST: AST_CMD_LIST,  
+                                            AST: AST_IF_THEN_ELSE,  
+                                              AST: AST_LESS,  
+                                                AST: AST_SYMBOL, z 
+                                                AST: AST_SYMBOL, 5 
+                                              AST: AST_CMD_BLOCK,  
+                                                AST: AST_CMD_LIST,  
+                                                  AST: AST_PRINT,  
+                                                    AST: AST_PRINT_LIST,  
+                                                      AST: AST_SYMBOL, x 
+                                                      AST: AST_PRINT_LIST,  
+                                                        AST: AST_SYMBOL, x1 
+                                                        AST: AST_PRINT_LIST,  
+                                                          AST: AST_SYMBOL, y 
+                                                          AST: AST_PRINT_LIST,  
+                                                            AST: AST_SYMBOL_VEC, vet2 
+                                                              AST: AST_SYMBOL, 3 
+                                              AST: AST_CMD_BLOCK,  
+                                                AST: AST_CMD_LIST,  
+                                                  AST: AST_PRINT,  
+                                                    AST: AST_PRINT_LIST,  
+                                                      AST: AST_SYMBOL_VEC, vet2 
+                                                        AST: AST_SYMBOL, 0 
+                                            AST: AST_CMD_LIST,  
+                                              AST: AST_ASSIGNMENT, z 
+                                                AST: AST_ADD,  
+                                                  AST: AST_SYMBOL, z 
+                                                  AST: AST_SYMBOL, 1 
+                                      AST: AST_CMD_LIST,  
+                                        AST: AST_RETURN,  
+                                          AST: AST_SYMBOL, 0 
+
+
+TAC:
+
+TAC(TAC_ENDFUN,main,,)
+TAC(TAC_RET,0,,)
+TAC(TAC_LABEL,______Label_____var_3,,)
+TAC(TAC_JUMP,______Label_____var_2,,)
+TAC(TAC_COPY,z,______Temp_____var_7,)
+TAC(TAC_ADD,______Temp_____var_7,z,1)
+TAC(TAC_LABEL,______Label_____var_1,,)
+TAC(TAC_PRINT,______Temp_____var_6,,)
+TAC(TAC_VET_LOAD,______Temp_____var_6,vet2,0)
+TAC(TAC_LABEL,______Label_____var_0,,)
+TAC(TAC_JUMP,______Label_____var_1,,)
+TAC(TAC_PRINT,______Temp_____var_5,,)
+TAC(TAC_VET_LOAD,______Temp_____var_5,vet2,3)
+TAC(TAC_PRINT,y,,)
+TAC(TAC_PRINT,x1,,)
+TAC(TAC_PRINT,x,,)
+TAC(TAC_JFALSE,______Label_____var_0,______Temp_____var_4,)
+TAC(TAC_LESS,______Temp_____var_4,z,5)
+TAC(TAC_JFALSE,______Label_____var_3,______Temp_____var_3,)
+TAC(TAC_LESS,______Temp_____var_3,z,001)
+TAC(TAC_LABEL,______Label_____var_2,,)
+TAC(TAC_BEGINFUN,main,,)
+TAC(TAC_ENDFUN,func_real,,)
+TAC(TAC_RET,______Temp_____var_2,,)
+TAC(TAC_ADD,______Temp_____var_2,r1,r2)
+TAC(TAC_BEGINFUN,func_real,,)
+TAC(TAC_ENDFUN,func,,)
+TAC(TAC_RET,______Temp_____var_1,,)
+TAC(TAC_ADD,______Temp_____var_1,______Temp_____var_0,c)
+TAC(TAC_ADD,______Temp_____var_0,a,b)
+TAC(TAC_BEGINFUN,func,,)
+
+QUANTIDADE DE LINHAS: 55
+
+
+TABELA DE SÍMBOLOS:
+Symbol[SYMBOL_LIT_CHAR,'d',CHAR,0]
+Symbol[SYMBOL_LIT_INT,0,INT,0]
+Symbol[SYMBOL_LIT_INT,001,INT,0]
+Symbol[SYMBOL_LIT_INT,01,INT,0]
+Symbol[SYMBOL_LIT_INT,1,INT,0]
+Symbol[SYMBOL_LIT_REAL,1/2,REAL,0]
+Symbol[SYMBOL_LIT_REAL,1234123/12,REAL,0]
+Symbol[SYMBOL_LIT_INT,1324,INT,0]
+Symbol[SYMBOL_LIT_INT,2,INT,0]
+Symbol[SYMBOL_LIT_INT,3,INT,0]
+Symbol[SYMBOL_LIT_REAL,3/5,REAL,0]
+Symbol[SYMBOL_LIT_INT,323,INT,0]
+Symbol[SYMBOL_LIT_INT,4,INT,0]
+Symbol[SYMBOL_LIT_INT,5,INT,0]
+Symbol[SYMBOL_ID,______Label_____var_0,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_1,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_2,STRING,0]
+Symbol[SYMBOL_ID,______Label_____var_3,STRING,0]
+Symbol[SYMBOL_ID,______Temp_____var_0,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_1,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_2,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_3,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_4,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_5,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_6,REAL,0]
+Symbol[SYMBOL_ID,______Temp_____var_7,REAL,0]
+Symbol[FUNC_PAR,a,INT,0]
+Symbol[VAR,arg1,INT,0]
+Symbol[VAR,arg2,INT,0]
+Symbol[VAR,arg3,INT,0]
+Symbol[FUNC_PAR,b,INT,0]
+Symbol[FUNC_PAR,c,INT,0]
+Symbol[FUNC,func,INT,3]
+Symbol[FUNC,func_real,REAL,0]
+Symbol[FUNC,main,INT,0]
+Symbol[FUNC_PAR,r1,REAL,0]
+Symbol[FUNC_PAR,r2,REAL,0]
+Symbol[VAR,real1,REAL,0]
+Symbol[VAR,real2,REAL,0]
+Symbol[VAR,realzin,REAL,0]
+Symbol[VET,vet1,INT,0]
+Symbol[VET,vet2,INT,0]
+Symbol[VAR,w,INT,0]
+Symbol[VAR,x,INT,0]
+Symbol[VAR,x1,INT,0]
+Symbol[VAR,y,BYTE,0]
+Symbol[VAR,z,INT,0]
+
+PROGRAMA COMPILADO SEM ERROS!
+
+
+--------------------------------------------------------------------------------------------------------------

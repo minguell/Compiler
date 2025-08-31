@@ -1,0 +1,37 @@
+int x = 1324;
+int x1 = 'd';
+byte y = 323;
+int z = 0;
+int w = 3;
+int arg1 = 1;
+int arg2 = 2;
+int arg3 = 1;
+int vet1[01];
+int vet2[5] = 1, 2, 3, 4, 5;
+real realzin = 1234123/12;
+real real1 = 1/2;
+real real2 = 3/5;
+int func(int a, int b, int c)
+{
+    return ((a + b) + c);
+}
+real func_real(real r1, real r2)
+{
+    return (r1 + r2);
+}
+int main()
+{
+    while ((z < 001)) do
+    {
+        if ((z < 5))
+        {
+            print x x1 y vet2[3];
+        }
+        else
+        {
+            print vet2[0];
+        }
+        z = (z + 1);
+    }
+    return 0;
+}

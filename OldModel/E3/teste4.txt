@@ -1,0 +1,10 @@
+int y = 'c';
+byte z = 01;
+int vet1[ 4 ] = 1 , 1 , 1 , 1 , 1;
+int teste(int a, byte b)
+{
+    aaaaaa = x + 10 * (fun(x,y,z) - fun2(x,y,z)) * vet1[0];
+    read a;
+    print "a" "b" "c";
+    return aaaaaa;
+}

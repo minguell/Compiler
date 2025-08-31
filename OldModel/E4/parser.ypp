@@ -1,0 +1,274 @@
+%code requires {
+    struct SYMBOL;
+    struct AST;
+}
+
+%{ 
+//Aluno: Miguel Dutra Fontes Guerra
+//Cartão UFRGS: 00342573
+#include <stdio.h>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+#include "symbols.hpp"
+#include "ast.hpp"
+#include "semantic.hpp"
+
+using namespace std;
+
+extern int lineNumber;
+extern const char* outputFile;
+
+int yylex();
+void yyerror(string msg);
+int getLineNumber();
+%}
+
+%union {
+        SYMBOL * symbol;
+        AST * ast;
+}
+
+%token KW_BYTE
+%token KW_INT
+%token KW_REAL
+
+%token KW_IF
+%token KW_ELSE
+%token KW_DO
+%token KW_WHILE
+%token KW_READ
+%token KW_PRINT
+%token KW_RETURN
+
+%token OPERATOR_LE
+%token OPERATOR_GE
+%token OPERATOR_EQ
+%token OPERATOR_DIF
+
+%token <symbol>TK_IDENTIFIER
+
+%token <symbol>LIT_INT
+%token <symbol>LIT_CHAR
+%token <symbol>LIT_REAL
+%token <symbol>LIT_STRING
+
+%token TOKEN_ERROR
+
+%type  <ast> func
+
+%type <ast> cmd
+%type <ast> cmd_lst
+%type <ast> cmd_blc
+%type <ast> print_lst
+%type <ast> expr
+%type <ast> dec
+%type <ast> vardec
+%type <ast> fundec
+%type <ast> vetdec
+%type <ast> ldecl
+%type <ast> program
+%type <ast> print_elem
+%type <ast> par
+%type <ast> par_nvazio
+
+%type <ast> par_elem
+%type <ast> parlist
+%type <ast> parlist_nvazio
+%type <ast> expr_vet_elem_list
+%type <ast> expr_vet_real_list
+%type <ast> expr_vet_elem
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc KW_ELSE
+%left '+' '-' 
+%left '*' '/'
+%left '&' '|' '~'
+%left '(' ')'
+
+%nonassoc '<' '>' OPERATOR_LE OPERATOR_GE OPERATOR_EQ OPERATOR_DIF
+
+%%
+program: ldecl          { $$ = $1; astPrint($$,0); printf("\n");
+                          
+                          // DECLARACOES
+                          checkAndSetDeclarations($$);
+                          checkUndeclared();
+                          
+                          //ATRIBUICOES E OPERACOES
+                          checkOperands($$);
+                          checkAssignments($$);
+                          
+                          // VARIAVEIS
+                          checkVariables($$);
+
+                          // VETORES
+                          checkVectors($$);
+                        
+                          // FUNÇÕES
+                          checkNumParFunc($$);
+                          checkTypeParFunc($$);
+                          checkReturn($$);
+
+
+                          std::ofstream outFile(outputFile);
+                          if (!outFile.is_open())
+                          {
+                                std::cerr << "Erro ao abrir o arquivo de saída.\n";
+                                return 1;
+                          }
+                          descompile($$, outFile);
+                          outFile.close(); 
+                        }
+    ;
+
+ldecl: dec ldecl        { vector<AST*> children = {$1,$2}; $$ = new AST(AST_LDECL, children); }
+     |                  { $$ = nullptr; }
+     ;
+
+dec: vardec             { $$ = $1; }
+   | vetdec             { $$ = $1; }
+   | fundec             { $$ = $1; }
+   ;
+
+// --------------------------------------------------------------------------------------------------------------------
+
+// DECLARAÇÃO DAS VARIÁVEIS
+
+vardec: KW_INT TK_IDENTIFIER '=' LIT_CHAR ';'   { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_INT_VARDEC, children, $2);}
+      | KW_INT TK_IDENTIFIER '=' LIT_INT ';'    { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_INT_VARDEC, children, $2);} 
+      | KW_INT TK_IDENTIFIER '=' LIT_REAL ';'   { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_INT_VARDEC, children, $2);}
+      | KW_BYTE TK_IDENTIFIER '=' LIT_CHAR ';'  { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_BYTE_VARDEC, children, $2);}
+      | KW_BYTE TK_IDENTIFIER '=' LIT_INT ';'   { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_BYTE_VARDEC, children, $2);}
+      | KW_BYTE TK_IDENTIFIER '=' LIT_REAL ';'  { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_BYTE_VARDEC, children, $2);}
+      | KW_REAL TK_IDENTIFIER '=' LIT_INT ';'   { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_REAL_VARDEC, children, $2);}
+      | KW_REAL TK_IDENTIFIER '=' LIT_CHAR ';'  { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_REAL_VARDEC, children, $2);}
+      | KW_REAL TK_IDENTIFIER '=' LIT_REAL ';'  { vector<AST*> children = {new AST(AST_SYMBOL, {}, $4)}; $$ = new AST(AST_REAL_VARDEC, children, $2);}
+      ;
+
+// --------------------------------------------------------------------------------------------------------------------
+
+// DECLARAÇÃO DOS VETORES
+
+expr_vet_elem_list: expr_vet_elem                               { $$ = $1; }
+                  | expr_vet_elem ',' expr_vet_elem_list        { vector<AST*> children = {$1, $3}; $$ = new AST(AST_EXPR_VET_ELEM, children); }
+                  ;
+
+expr_vet_elem: LIT_CHAR                                         { vector<AST*> children; $$ = new AST(AST_SYMBOL, children, $1); }
+             | LIT_INT                                          { vector<AST*> children; $$ = new AST(AST_SYMBOL, children, $1); }
+             ;
+expr_vet_real_list: LIT_REAL                                    { vector<AST*> children; $$ = new AST(AST_SYMBOL, children, $1); }
+                  | LIT_REAL ',' expr_vet_real_list             { vector<AST*> children = {$3}; $$ = new AST(AST_SYMBOL, children, $1); }
+                  ;
+
+vetdec: KW_INT TK_IDENTIFIER '[' expr ']' '=' expr_vet_elem_list ';'    { vector<AST*> children = {$4, $7}; $$ = new AST(AST_INT_VETDEC, children, $2);}
+      | KW_INT TK_IDENTIFIER '[' expr ']' ';'                           { vector<AST*> children = {$4}; $$ = new AST(AST_INT_VETDEC_VAZIO, children, $2);}
+      | KW_BYTE TK_IDENTIFIER '[' expr ']' '=' expr_vet_elem_list ';'   { vector<AST*> children = {$4, $7}; $$ = new AST(AST_BYTE_VETDEC, children, $2);}
+      | KW_BYTE TK_IDENTIFIER '[' expr ']' ';'                          { vector<AST*> children = {$4}; $$ = new AST(AST_BYTE_VETDEC_VAZIO, children, $2);}
+      | KW_REAL TK_IDENTIFIER '[' expr ']' '=' expr_vet_real_list ';'   { vector<AST*> children = {$4, $7}; $$ = new AST(AST_REAL_VETDEC, children, $2);}
+      | KW_REAL TK_IDENTIFIER '[' expr ']' ';'                          { vector<AST*> children = {$4}; $$ = new AST(AST_REAL_VETDEC_VAZIO, children, $2);} 
+      ;
+
+// --------------------------------------------------------------------------------------------------------------------
+
+// DECLARAÇÃO DAS FUNÇÕES
+
+parlist:                                {$$ = nullptr;}
+        | parlist_nvazio                {$$ = $1;}
+        ;
+
+parlist_nvazio: par_elem                {$$ = $1;}
+        | par_elem ',' parlist_nvazio   {vector<AST*> children = {$1, $3}; $$ = new AST(AST_PAR_LIST, children);}
+        ;
+
+par_elem: KW_INT TK_IDENTIFIER             {vector<AST*> children; $$ = new AST(AST_PAR_INT_SYMBOL, children, $2); }
+        | KW_BYTE TK_IDENTIFIER            {vector<AST*> children; $$ = new AST(AST_PAR_BYTE_SYMBOL, children, $2);}
+        | KW_REAL TK_IDENTIFIER            {vector<AST*> children; $$ = new AST(AST_PAR_REAL_SYMBOL, children, $2);}
+        ;
+
+fundec: KW_INT TK_IDENTIFIER '('parlist')' cmd_blc  { vector<AST*> children = {$4,$6}; $$ = new AST(AST_INT_FUNDEC, children, $2);}
+      |KW_BYTE TK_IDENTIFIER '('parlist')' cmd_blc  { vector<AST*> children = {$4,$6}; $$ = new AST(AST_BYTE_FUNDEC, children, $2);}
+      |KW_REAL TK_IDENTIFIER '('parlist')' cmd_blc  { vector<AST*> children = {$4,$6}; $$ = new AST(AST_REAL_FUNDEC, children, $2);}
+      ;
+
+cmd_blc: '{'cmd_lst'}' { vector<AST*> children = {$2}; $$ = new AST(AST_CMD_BLOCK, children); }
+       ;
+
+cmd_lst: { $$ = nullptr; }
+       | cmd cmd_lst    { vector<AST*> children = {$1, $2}; $$ = new AST(AST_CMD_LIST, children); }
+       ;
+
+// =============================================================================================
+
+// LISTA DE ELEMENTOS NO PRINT
+
+print_lst: print_elem                    { vector<AST*> children = {$1, nullptr}; $$ = new AST(AST_PRINT_LIST, children); }
+        |print_elem print_lst            { vector<AST*> children = {$1, $2}; $$ = new AST(AST_PRINT_LIST, children); }
+        ;
+
+print_elem: LIT_STRING           { $$ = new AST(AST_SYMBOL, {}, $1); }
+        | expr                   { $$ = $1; }
+        ;
+
+// =============================================================================================
+
+// COMANDOS
+
+cmd: TK_IDENTIFIER '=' expr ';'                 { vector<AST*> children = {$3}; $$ = new AST(AST_ASSIGNMENT, children, $1);}
+    |TK_IDENTIFIER'['expr']' '=' expr ';'       { vector<AST*> children = {$3, $6}; $$ = new AST(AST_VET_ASSIGNMENT, children, $1);}
+    |KW_PRINT print_lst';'                      { vector<AST*> children = {$2}; $$ = new AST(AST_PRINT, children);}
+    |KW_RETURN expr';'                          { vector<AST*> children = {$2}; $$ = new AST(AST_RETURN, children);}
+    |KW_READ TK_IDENTIFIER';'                   { vector<AST*> children; $$ = new AST(AST_READ, children, $2);}
+    |KW_IF '('expr')' cmd %prec LOWER_THAN_ELSE { vector<AST*> children = {$3, $5}; $$ = new AST(AST_IF_THEN, children);}
+    |KW_IF '('expr')' cmd KW_ELSE cmd           { vector<AST*> children = {$3, $5, $7}; $$ = new AST(AST_IF_THEN_ELSE, children);}
+    |KW_WHILE expr KW_DO cmd                    { vector<AST*> children = {$2, $4}; $$ = new AST(AST_WHILE, children);}
+    |KW_DO cmd KW_WHILE expr ';'                { vector<AST*> children = {$2, $4}; $$ = new AST(AST_DO_WHILE, children);}
+    |cmd_blc                                    { $$ = $1; }
+    | ';'                                       { $$ = nullptr; }
+    ;
+
+// =============================================================================================
+
+par: par_nvazio                   { $$ = $1; }
+    |                             { $$ = nullptr; }
+    ;
+
+par_nvazio: expr                  { vector<AST*> children = {$1, nullptr}; $$ = new AST(AST_EXP_LIST, children); }
+        | expr ',' par_nvazio     { vector<AST*> children = {$1, $3}; $$ = new AST(AST_EXP_LIST, children); }
+        ;
+
+// EXPRESSÕES
+
+func: TK_IDENTIFIER'('par')'      { vector<AST*> children = {$3}; $$ = new AST(AST_SYMBOL_FUNC, children, $1); }
+
+expr: func                      { $$ = $1; }
+    | TK_IDENTIFIER'['expr']'   { vector<AST*> children = {$3}; $$ = new AST(AST_SYMBOL_VEC, children, $1); }
+    | TK_IDENTIFIER             { vector<AST*> children; $$ = new AST(AST_SYMBOL, children, $1); }
+    | LIT_INT                   { vector<AST*> children; $$ = new AST(AST_SYMBOL, children, $1); }
+    | LIT_CHAR                  { vector<AST*> children; $$ = new AST(AST_SYMBOL, children, $1); }
+    | LIT_REAL                  { vector<AST*> children; $$ = new AST(AST_SYMBOL, children, $1); }
+                                
+    | expr '+' expr             { vector<AST*> children = {$1, $3}; $$ = new AST(AST_ADD, children); }
+    | expr '-' expr             { vector<AST*> children = {$1, $3}; $$ = new AST(AST_SUB, children); }
+    | expr '*' expr             { vector<AST*> children = {$1, $3}; $$ = new AST(AST_MUL, children); }
+    | expr '/' expr             { vector<AST*> children = {$1, $3}; $$ = new AST(AST_DIV, children); }
+    | expr '&' expr             { vector<AST*> children = {$1, $3}; $$ = new AST(AST_AND, children); }
+    | expr '|' expr             { vector<AST*> children = {$1, $3}; $$ = new AST(AST_OR, children); }
+    | expr '<' expr             { vector<AST*> children = {$1, $3}; $$ = new AST(AST_LESS, children); }
+    | expr '>' expr             { vector<AST*> children = {$1, $3}; $$ = new AST(AST_GRT, children); }
+    | '~' expr                  { vector<AST*> children = {$2}; $$ = new AST(AST_NOT, children); }
+    | expr OPERATOR_EQ expr     { vector<AST*> children = {$1, $3}; $$ = new AST(AST_EQUAL, children); }
+    | expr OPERATOR_DIF expr    { vector<AST*> children = {$1, $3}; $$ = new AST(AST_DIF, children); }
+    | expr OPERATOR_GE expr     { vector<AST*> children = {$1, $3}; $$ = new AST(AST_GE, children); }
+    | expr OPERATOR_LE expr     { vector<AST*> children = {$1, $3}; $$ = new AST(AST_LE, children); }
+    | '('expr')'                { $$ = $2; }
+    ;
+
+%%
+
+void yyerror(string msg)
+{
+    fprintf(stderr, "ERRO DE SINTAXE. ERRO NA linha %d", lineNumber);
+    exit(3);
+}
