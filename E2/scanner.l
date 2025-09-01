@@ -1,93 +1,51 @@
+/* Augusto Mattei Grohmnann - 550429
+ Miguel Dutra Fontes Guerra - 342573 */
+
 %{
-//Aluno: Miguel Dutra Fontes Guerra
-//Cartão UFRGS: 00342573
-#include "stdio.h"
-#include "parser.tab.h"
-#include "symbol.h"
-
-
-int running = 1;
-int lineNumber = 1;
+#include "tokens.h"
 %}
 
-%x COMMENT
+%option noyywrap
+%option yylineno
+
 
 %%
 
-"byte"           { return KW_BYTE; }
-"int"            { return KW_INT; }
-"real"           { return KW_REAL; }
-"if"             { return KW_IF; }
-"else"           { return KW_ELSE; }
-"do"             { return KW_DO; }
-"while"          { return KW_WHILE; }
-"read"           { return KW_READ; }
-"print"          { return KW_PRINT; }
-"return"         { return KW_RETURN; }
+[ \t\r\f\v\n]+      /* Ignora espaços, tabulações e linhas (contadas pelo yylineno) */          
+"//".*\n           /* Ignora comentários de uma linha */
 
-[,;:()\[\]{}=+\-*/%<>&|~] { return yytext[0]; }
+"tipo"              { return TK_TIPO; }
+"var"               { return TK_VAR; }
+"senao"             { return TK_SENAO; }
+"decimal"           { return TK_DECIMAL; }
+"se"                { return TK_SE; }
+"inteiro"           { return TK_INTEIRO; }
+"retorna"           { return TK_RETORNA; }
+"enquanto"          { return TK_ENQUANTO; }
+"com"               { return TK_COM; }
 
-"<="            { return OPERATOR_LE; }
-">="            { return OPERATOR_GE; }
-"=="            { return OPERATOR_EQ; }
-"!="            { return OPERATOR_DIF; }
+[!*/%<>[\]()=,;&|+-] { return yytext[0]; }
 
-[a-zA-Z_][a-zA-Z_0-9]*  {
-    yylval.symbol = insertSymbol(yytext, SYMBOL_IDENTIFIER);
-    return TK_IDENTIFIER;
-}
+"<="                { return TK_OC_LE; }
+">="                { return TK_OC_GE; }
+"=="                { return TK_OC_EQ; }
+"!="                { return TK_OC_NE; }
+":="                { return TK_ATRIB; }
+"->"                { return TK_SETA; }
 
-[0-9]+ {
-    yylval.symbol = insertSymbol(yytext, SYMBOL_LIT_INT);
-    return LIT_INT;
-}
+[a-z_][a-z0-9_]*    { return TK_ID; }
 
-"'"(\\.|[^'\n])"'" {
-    yylval.symbol = insertSymbol(yytext, SYMBOL_LIT_CHAR);
-    return LIT_CHAR;
-}
+[0-9]+              { return TK_LI_INTEIRO; }
+[0-9]*"."[0-9]+     { return TK_LI_DECIMAL; }
 
-[0-9]+"/"[0-9]+ {
-    yylval.symbol = insertSymbol(yytext, SYMBOL_LIT_REAL);
-    return LIT_REAL;
-}
-
-\"([^"\\]|\\.)*\" {
-    yylval.symbol = insertSymbol(yytext, SYMBOL_LIT_STRING);
-    return LIT_STRING;
-}
-
-
-[ \t\r\f\v]+         /* Ignora espaços e tabulações */
-
-\n                     { lineNumber++; }
-
-"//".*                /* Ignora comentários de uma linha */
-
-"/--"                 { BEGIN(COMMENT); }
-
-<COMMENT>"--/"        { BEGIN(INITIAL); }
-<COMMENT>\n           { lineNumber++; }
-<COMMENT>.            /* Ignora conteúdo do comentário */
-
-.  { printf("Erro lexico na linha %d: caractere invalido '%s'\n", lineNumber, yytext); return TOKEN_ERROR; }
+.                   {return TK_ER; }
 
 %%
+#include "main.cpp"
 
-extern int yylex(void);
-
-int yywrap() {
-    running = 0;
-    return 1;
+int get_line_number(void)
+{
+    return yylineno;
 }
 
-void initMe(void) {}
-
-int getLineNumber(void) {
-    return lineNumber;
-}
-
-int isRunning(void){
-    return running;
-}
 
