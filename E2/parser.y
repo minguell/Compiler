@@ -1,8 +1,11 @@
 %{
+#include <stdio.h>
 int yylex(void);
 void yyerror (char const *mensagem);
 %}
 
+
+%define parse.error verboso
 %token TK_TIPO
 %token TK_VAR
 %token TK_SENAO
@@ -25,7 +28,20 @@ void yyerror (char const *mensagem);
 
 %%
 
-programa:
+programa: lista ';';
+programa: %empty;
+lista: elemento;
+lista: lista ',' elemento;
+elemento: declaracao_variavel;
+elemento: declaracao_funcao;
+declaracao variavel: TK_INTEIRO;
+declaracao variavel: TK_DECIMAL;
 
 %%
+
+ void yyerror (char const *mensagem)
+ {
+ 
+ 	printf("O erro semantico foi %s encontrado na linha %d", mensagem linha)
+ }
 
