@@ -2,6 +2,7 @@
 #include <stdio.h>
 int yylex(void);
 void yyerror (char const *mensagem);
+int get_line_number();
 %}
 
 
@@ -39,9 +40,9 @@ declaracao variavel: TK_DECIMAL;
 
 %%
 
- void yyerror (char const *mensagem)
- {
- 
- 	printf("O erro semantico foi %s encontrado na linha %d", mensagem linha)
- }
+ void yyerror (char const *mensagem) {
+
+    printf ("Erro na Linha %i - [%s]\n", get_line_number(), mensagem);
+
+}
 
