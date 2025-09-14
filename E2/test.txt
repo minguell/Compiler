@@ -1,0 +1,49 @@
+// Arquivo de teste para a Etapa 2 - Analisador Sintático
+
+// 1. Declaração de variável global (separada por vírgula)
+var versao_compilador := decimal,
+
+// 2. Definição de uma função com parâmetros
+// Testa o 'com', a lista de parâmetros e o corpo da função
+calcula -> inteiro com a := inteiro, b := inteiro :=
+{
+    // Declaração de variável local com inicialização
+    var resultado := inteiro com 0;
+
+    // Comando de atribuição com expressão (precedência de operadores)
+    resultado := a * a + b * b;
+
+    // Comando condicional 'se' com 'senao'
+    se (resultado <= 100)
+    {
+        // Chamada de função sem argumentos (fictícia)
+    }
+    senao
+    {
+        // Bloco vazio
+    }
+
+    // Comando de retorno
+    retorna resultado -> inteiro;
+},
+
+// 3. Definição de uma função sem parâmetros
+main -> inteiro :=
+{
+    // Declarações locais
+    var x := inteiro;
+    var i := inteiro com 0;
+
+    // Atribuição com chamada de função e expressão
+    x := calcula(5, 10);
+
+    // Comando de repetição 'enquanto'
+    enquanto (i < 10)
+    {
+        i := i + 1;
+    }
+
+    // Retorno final
+    retorna 0 -> inteiro;
+}; // Ponto-e-vírgula finalizando a lista de elementos do programa
+
