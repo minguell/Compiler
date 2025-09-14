@@ -6,7 +6,7 @@ int get_line_number();
 %}
 
 
-%define parse.error verboso
+%define parse.error verbose
 %token TK_TIPO
 %token TK_VAR
 %token TK_SENAO
