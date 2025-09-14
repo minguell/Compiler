@@ -8,7 +8,7 @@ CFLAGS = -Wall -g
 # Ferramentas
 LEX = flex
 YACC = bison
-YFLAGS = -d # Gera .tab.h
+YFLAGS = -d -v# Gera .tab.h
 
 # Arquivos Fonte
 LEX_SRC = scanner.l
