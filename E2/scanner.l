@@ -2,7 +2,7 @@
  Miguel Dutra Fontes Guerra - 342573 */
 
 %{
-#include "tokens.h"
+#include "parser.tab.h"
 %}
 
 %option noyywrap
@@ -41,7 +41,6 @@
 .                   {return TK_ER; }
 
 %%
-#include "main.cpp"
 
 int get_line_number(void)
 {
