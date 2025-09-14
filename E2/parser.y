@@ -60,9 +60,7 @@ parametros: parametro
           | parametros ',' parametro
           ;
 
-parametro: TK_ID TK_ATRIB tipo_num; 
-
-tipo_num: TK_DECIMAL | TK_INTEIRO;
+parametro: TK_ID TK_ATRIB tipo_num;
 
 
 bloco_de_comandos: '{' '}'
@@ -117,9 +115,8 @@ retorno: TK_RETORNA expressao TK_ATRIB tipo_num ';';
 
 repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos;	
 
-operando: TK_ID | literal | chamada_funcao | expressao;
-
-tipo_num: TK_DECIMAL | TK_INTEIRO;
+tipo_num: TK_DECIMAL 
+          | TK_INTEIRO;
 
 expressao: expr_logica_ou;
 
