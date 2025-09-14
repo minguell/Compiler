@@ -121,6 +121,8 @@ operando: TK_ID | literal | chamada_funcao | expressao;
 
 tipo_num: TK_DECIMAL | TK_INTEIRO;
 
+expressao: expr_logica_ou;
+
 expr_logica_ou: expr_logica_ou '|' expr_logica_e
               | expr_logica_e
               ;
