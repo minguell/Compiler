@@ -1,0 +1,9 @@
+
+E2/etapa2
+E2/lex.yy.c
+E2/lex.yy.o
+E2/main.o
+E2/parser.output
+E2/parser.tab.c
+E2/parser.tab.h
+E2/parser.tab.o
