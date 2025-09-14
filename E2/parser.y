@@ -63,8 +63,8 @@ parametros: parametro
 parametro: TK_ID TK_ATRIB tipo_num;
 
 
-bloco_de_comandos: '{' '}'
-                 | '{' sequencia_comandos '}'
+bloco_de_comandos: '[' ']'
+                 | '[' sequencia_comandos ']'
                  ;
                  
 sequencia_comandos: comando
