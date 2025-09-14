@@ -88,14 +88,14 @@ unmatched_statement: TK_SE '(' expressao ')' comando
 /* Todos os outros comandos que não são condicionais. */
 outro_comando: bloco_de_comandos
              | declaracao_variavel_comando
-             | atribuicao ';'
-             | chamada_funcao ';'
+             | atribuicao
+             | chamada_funcao
              | retorno
              | repeticao
              ;
              
-declaracao_variavel_comando: declaracao_variavel ';'
-                           | declaracao_variavel TK_COM literal ';'
+declaracao_variavel_comando: declaracao_variavel
+                           | declaracao_variavel TK_COM literal
                            ;
 
 literal: TK_LI_INTEIRO | TK_LI_DECIMAL;
@@ -110,7 +110,7 @@ argumentos: expressao
           | argumentos ',' expressao
           ;
           
-retorno: TK_RETORNA expressao TK_ATRIB tipo_num ';';
+retorno: TK_RETORNA expressao TK_ATRIB tipo_num;
 
 
 repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos;	
