@@ -1,9 +1,14 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include "asd.h"
+
 int yylex(void);
 void yyerror (char const *mensagem);
 int get_line_number();
+
+extern asd_tree_t *arvore; 
+
 typedef struct {
         int numero_linha;
         int tipo;
@@ -35,144 +40,219 @@ typedef struct {
 
 %union {
         Valor_Lexico valor_lexico;
+        asd_tree_t* nodo_arvore;
 }
+
+
+%type <nodo_arvore> programa lista elemento declaracao_variavel declaracao_funcao
+%type <nodo_arvore> cabecalho_funcao lista_parametros_opcional lista_parametros parametros parametro
+%type <nodo_arvore> bloco_de_comandos sequencia_comandos comando matched_statement unmatched_statement
+%type <nodo_arvore> outro_comando declaracao_variavel_comando atribuicao chamada_funcao retorno repeticao
+%type <nodo_arvore> tipo_num expressao expr_logica_ou expr_logica_e expr_igualdade expr_relacional
+%type <nodo_arvore> expr_aditiva expr_multiplicativa expr_unaria fator literal argumentos
 
 %%
 
-programa: lista ';'
-        | %empty
+programa: lista ';'	{ arvore = $1;}
+        | %empty	{ arvore = NULL; }
         ;
         
-lista: elemento
-     | lista ',' elemento
+lista: elemento		{ $$ = $1; }
+     | lista ',' elemento	{ $$ = $1; asd_add_child($$, $3);}
      ;
      
-elemento: declaracao_variavel
-        | declaracao_funcao
+elemento: declaracao_variavel	{ $$ = $1; }
+        | declaracao_funcao	{ $$ = $1; }
         ;
         
-declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num;
+declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
+                        $$ = asd_new("var");
+                        asd_tree_t* id_node = asd_new($2.valor);
+                        asd_add_child($$, id_node);
+                        asd_add_child($$, $4);
+                        free($2.valor);
+                    };
 
-declaracao_funcao: cabecalho_funcao bloco_de_comandos;
+declaracao_funcao: cabecalho_funcao bloco_de_comandos {
+                        $$ = $1;
+                        asd_add_child($$, $2); 
+                   };
 
-cabecalho_funcao: TK_ID TK_SETA tipo_num lista_parametros_opcional TK_ATRIB;
+cabecalho_funcao: TK_ID TK_SETA tipo_num lista_parametros_opcional TK_ATRIB {
+                        $$ = asd_new($1.valor); 
+                        asd_add_child($$, $3);
+                        if ($4 != NULL) asd_add_child($$, $4);
+                        free($1.valor);
+                  };
 
 
-lista_parametros_opcional: lista_parametros
-                         | %empty
+lista_parametros_opcional: lista_parametros 	{ $$ = $1; }
+                         | %empty		{ $$ = NULL; }
                          ;
                          
-lista_parametros: TK_COM parametros
-                | parametros
+lista_parametros: TK_COM parametros		{ $$ = $2; }
+                | parametros			{ $$ = $1; }
                 ;
                 
-parametros: parametro
-          | parametros ',' parametro
+parametros: parametro				{ $$ = $1; }
+          | parametros ',' parametro		{ $$ = $1; asd_add_child($$, $3); }
           ;
 
-parametro: TK_ID TK_ATRIB tipo_num;
+parametro: TK_ID TK_ATRIB tipo_num		{
+                $$ = asd_new("param");
+                asd_tree_t* id_node = asd_new($1.valor);
+                asd_add_child($$, id_node);
+                asd_add_child($$, $3);
+                free($1.valor);
+           };
 
 
-bloco_de_comandos: '[' ']'
-                 | '[' sequencia_comandos ']'
+bloco_de_comandos: '[' ']' 			{ $$ = NULL; }
+                 | '[' sequencia_comandos ']'	{ $$ = $2; }
                  ;
                  
-sequencia_comandos: comando
-                  | sequencia_comandos comando
+sequencia_comandos: comando			{ $$ = $1; }
+                  | sequencia_comandos comando	{ $$ = $1; asd_add_child($$, $2);}
                   ;
                   
-comando: matched_statement
-       | unmatched_statement
+comando: matched_statement			{ $$ = $1; }
+       | unmatched_statement			{ $$ = $1; }
        ;
        
 /* Um "matched statement" é um if/else completo ou outro comando que não seja um if incompleto. */
-matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_statement
-                 | outro_comando
+matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_statement		{
+                        $$ = asd_new("se"); 
+                        asd_add_child($$, $3); 
+                        asd_add_child($$, $5); 
+                        asd_add_child($$, $7); 
+                   }
+                 | outro_comando		{ $$ = $1; }
                  ;
  
 /* Um "unmatched statement" contém um if sem else. */
-unmatched_statement: TK_SE '(' expressao ')' comando
-                   | TK_SE '(' expressao ')' matched_statement TK_SENAO unmatched_statement
+unmatched_statement: TK_SE '(' expressao ')' comando		{
+                        $$ = asd_new("se"); 
+                        asd_add_child($$, $3); 
+                        asd_add_child($$, $5); 
+                   }
+                   | TK_SE '(' expressao ')' matched_statement TK_SENAO unmatched_statement	{
+                        $$ = asd_new("se");
+                        asd_add_child($$, $3);
+                        asd_add_child($$, $5);
+                        asd_add_child($$, $7);
+                   }
                    ;
                    
 /* Todos os outros comandos que não são condicionais. */
-outro_comando: bloco_de_comandos
-             | declaracao_variavel_comando
-             | atribuicao
-             | chamada_funcao
-             | retorno
-             | repeticao
+outro_comando: bloco_de_comandos		{ $$ = $1; }
+             | declaracao_variavel_comando	{ $$ = $1; }
+             | atribuicao			{ $$ = $1; }
+             | chamada_funcao			{ $$ = $1; }
+             | retorno				{ $$ = $1; }
+             | repeticao			{ $$ = $1; }
              ;
              
-declaracao_variavel_comando: declaracao_variavel
-                           | declaracao_variavel TK_COM literal
+declaracao_variavel_comando: declaracao_variavel			{ $$ = $1; }
+                           | declaracao_variavel TK_COM literal			{ 
+                                $$ = asd_new("com"); 
+                                asd_add_child($1, $3);
+                                $$ = $1; 
+                           }
                            ;
 
-literal: TK_LI_INTEIRO | TK_LI_DECIMAL;
+literal: TK_LI_INTEIRO 		{ $$ = asd_new($1.valor); free($1.valor);}
+	| TK_LI_DECIMAL			{ $$ = asd_new($1.valor); free($1.valor);} 
+;
 
-atribuicao: TK_ID TK_ATRIB expressao;
+atribuicao: TK_ID TK_ATRIB expressao; { 
+                $$ = asd_new(":="); 
+                asd_tree_t* id_node = asd_new($1.valor);
+                asd_add_child($$, id_node); 
+                asd_add_child($$, $3);     
+                free($1.valor);
+            };
 
-chamada_funcao: TK_ID '(' ')'
-              | TK_ID '(' argumentos ')'
+chamada_funcao: TK_ID '(' ')'		{
+                    char label[256];
+                    sprintf(label, "call %s", $1.valor);
+                    $$ = asd_new(label); 
+                    free($1.valor);
+              }
+              | TK_ID '(' argumentos ')' {
+                    char label[256];
+                    sprintf(label, "call %s", $1.valor);
+                    $$ = asd_new(label); 
+                    asd_add_child($$, $3); 
+                    free($1.valor);
+              }
               ;
               
-argumentos: expressao
-          | argumentos ',' expressao
+argumentos: expressao				{ $$ = $1; }
+          | argumentos ',' expressao		{ $$ = $1; asd_add_child($$, $3);}
           ;
           
-retorno: TK_RETORNA expressao TK_ATRIB tipo_num;
+retorno: TK_RETORNA expressao TK_ATRIB tipo_num { 
+            $$ = asd_new("retorna"); 
+            asd_add_child($$, $2); 
+         };
+;
 
 
-repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos;	
+repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos {	
+                $$ = asd_new("enquanto"); 
+                asd_add_child($$, $3); 
+                asd_add_child($$, $5); 
+           };;	
 
-tipo_num: TK_DECIMAL 
-          | TK_INTEIRO;
+tipo_num: TK_DECIMAL 		{ $$ = asd_new("decimal"); }
+          | TK_INTEIRO		{ $$ = asd_new("inteiro"); }
+          ;
 
-expressao: expr_logica_ou;
+expressao: expr_logica_ou		{ $$ = $1; };
 
-expr_logica_ou: expr_logica_ou '|' expr_logica_e
-              | expr_logica_e
+expr_logica_ou: expr_logica_ou '|' expr_logica_e	{ $$ = asd_new("|"); asd_add_child($$, $1); asd_add_child($$, $3); }
+              | expr_logica_e				{ $$ = $1; }
               ;
               
-expr_logica_e: expr_logica_e '&' expr_igualdade
-             | expr_igualdade
+expr_logica_e: expr_logica_e '&' expr_igualdade		{ $$ = asd_new("&"); asd_add_child($$, $1); asd_add_child($$, $3); }
+             | expr_igualdade				{ $$ = $1; }
              ;
 
-expr_igualdade: expr_igualdade TK_OC_EQ expr_relacional
-              | expr_igualdade TK_OC_NE expr_relacional
-              | expr_relacional
+expr_igualdade: expr_igualdade TK_OC_EQ expr_relacional		{ $$ = asd_new("=="); asd_add_child($$, $1); asd_add_child($$, $3); }
+              | expr_igualdade TK_OC_NE expr_relacional		{ $$ = asd_new("!="); asd_add_child($$, $1); asd_add_child($$, $3); }
+              | expr_relacional					{ $$ = $1; }
               ;
 
-expr_relacional: expr_relacional '<' expr_aditiva
-               | expr_relacional '>' expr_aditiva
-               | expr_relacional TK_OC_LE expr_aditiva
-               | expr_relacional TK_OC_GE expr_aditiva
-               | expr_aditiva
+expr_relacional: expr_relacional '<' expr_aditiva		{ $$ = asd_new("<"); asd_add_child($$, $1); asd_add_child($$, $3); }
+               | expr_relacional '>' expr_aditiva		{ $$ = asd_new(">"); asd_add_child($$, $1); asd_add_child($$, $3); }
+               | expr_relacional TK_OC_LE expr_aditiva		{ $$ = asd_new("<="); asd_add_child($$, $1); asd_add_child($$, $3); }
+               | expr_relacional TK_OC_GE expr_aditiva		{ $$ = asd_new(">="); asd_add_child($$, $1); asd_add_child($$, $3); }
+               | expr_aditiva		{ $$ = $1; }
                ;
 
 
-expr_aditiva: expr_aditiva '+' expr_multiplicativa
-            | expr_aditiva '-' expr_multiplicativa
-            | expr_multiplicativa
+expr_aditiva: expr_aditiva '+' expr_multiplicativa		{ $$ = asd_new("+"); asd_add_child($$, $1); asd_add_child($$, $3); }
+            | expr_aditiva '-' expr_multiplicativa		{ $$ = asd_new("-"); asd_add_child($$, $1); asd_add_child($$, $3); }
+            | expr_multiplicativa	{ $$ = $1; }
             ;
 
-expr_multiplicativa: expr_multiplicativa '*' expr_unaria
-                   | expr_multiplicativa '/' expr_unaria
-                   | expr_multiplicativa '%' expr_unaria
-                   | expr_unaria
+expr_multiplicativa: expr_multiplicativa '*' expr_unaria	{ $$ = asd_new("*"); asd_add_child($$, $1); asd_add_child($$, $3); }
+                   | expr_multiplicativa '/' expr_unaria	{ $$ = asd_new("/"); asd_add_child($$, $1); asd_add_child($$, $3); }
+                   | expr_multiplicativa '%' expr_unaria	{ $$ = asd_new("%"); asd_add_child($$, $1); asd_add_child($$, $3); }
+                   | expr_unaria	{ $$ = $1; }
                    ;
 
-expr_unaria: '+' fator
-           | '-' fator
-           | '!' fator
-           | fator
+expr_unaria: '+' fator		{ $$ = asd_new("+"); asd_add_child($$, $2); }
+           | '-' fator		{ $$ = asd_new("-"); asd_add_child($$, $2); }
+           | '!' fator		{ $$ = asd_new("!"); asd_add_child($$, $2); }
+           | fator		{ $$ = $1; }
            ;
 
 /* Fator: nível mais alto de precedência (literais, IDs, parênteses) */
 fator: TK_ID
-     | literal
-     | chamada_funcao
-     | '(' expressao ')'
+     | literal			{ $$ = $1; }
+     | chamada_funcao		{ $$ = $1; }
+     | '(' expressao ')'	{ $$ = $2; }
      ;
      
 %%
