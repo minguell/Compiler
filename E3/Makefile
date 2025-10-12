@@ -1,7 +1,7 @@
 # Augusto Mattei Grohmnann - 550429
 # Miguel Dutra Fontes Guerra - 342573 
 
-EXEC = etapa2
+EXEC = etapa3
 CC = gcc
 CFLAGS = -Wall -g
 
@@ -20,12 +20,12 @@ LEX_OUT = lex.yy.c
 YACC_OUT_C = parser.tab.c
 YACC_OUT_H = parser.tab.h
 
-OBJS = main.o lex.yy.o parser.tab.o # Arquivos Objeto
+OBJS = main.o lex.yy.o parser.tab.o asd.o # Arquivos Objeto
 
 all: $(EXEC)
 
 $(EXEC): $(OBJS)
-	$(CC) $(CFLAGS) -o $(EXEC) $(OBJS)
+	$(CC) $(CFLAGS) -fsanitize=address -o $(EXEC) $(OBJS)
 
 main.o: $(MAIN_SRC) $(YACC_OUT_H)
 	$(CC) $(CFLAGS) -c $(MAIN_SRC)
@@ -35,6 +35,9 @@ lex.yy.o: $(LEX_OUT) $(YACC_OUT_H)
 
 parser.tab.o: $(YACC_OUT_C)
 	$(CC) $(CFLAGS) -c $(YACC_OUT_C)
+	
+asd.o: asd.c asd.h
+	$(CC) $(CFLAGS) -c asd.c
 
 $(LEX_OUT): $(LEX_SRC)
 	$(LEX) -o $(LEX_OUT) $(LEX_SRC)

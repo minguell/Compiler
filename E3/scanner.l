@@ -3,6 +3,7 @@
 
 %{
 #include "parser.tab.h"
+#include "asd.h"
 %}
 
 %option noyywrap

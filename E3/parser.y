@@ -95,8 +95,7 @@ outro_comando: bloco_de_comandos
              ;
              
 declaracao_variavel_comando: declaracao_variavel
-                           | TK_VAR TK_ID TK_ATRIB TK_DECIMAL TK_COM TK_LI_DECIMAL
-                           | TK_VAR TK_ID TK_ATRIB TK_INTEIRO TK_COM TK_LI_INTEIRO
+                           | declaracao_variavel TK_COM literal
                            ;
 
 literal: TK_LI_INTEIRO | TK_LI_DECIMAL;
