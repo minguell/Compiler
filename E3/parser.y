@@ -1,8 +1,14 @@
 %{
 #include <stdio.h>
+#include <string.h>
 int yylex(void);
 void yyerror (char const *mensagem);
 int get_line_number();
+typedef struct {
+        int numero_linha;
+        int tipo;
+        char* valor;
+} Valor_Lexico;
 %}
 
 
@@ -22,10 +28,14 @@ int get_line_number();
 %token TK_OC_GE
 %token TK_OC_EQ
 %token TK_OC_NE
-%token TK_ID
-%token TK_LI_INTEIRO
-%token TK_LI_DECIMAL
+%token <valor_lexico> TK_ID
+%token <valor_lexico> TK_LI_INTEIRO
+%token <valor_lexico> TK_LI_DECIMAL
 %token TK_ER
+
+%union {
+        Valor_Lexico valor_lexico;
+}
 
 %%
 

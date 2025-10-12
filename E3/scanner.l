@@ -34,10 +34,20 @@
 ":="                { return TK_ATRIB; }
 "->"                { return TK_SETA; }
 
-[a-z_][a-z0-9_]*    { return TK_ID; }
+[a-z_][a-z0-9_]*    { yylval.valor_lexico.numero_linha = yylineno;
+                      yylval.valor_lexico.tipo = TK_ID;
+                      yylval.valor_lexico.value = strdup(yytext);
+                      return TK_ID; }
 
-[0-9]+              { return TK_LI_INTEIRO; }
-[0-9]*"."[0-9]+     { return TK_LI_DECIMAL; }
+[0-9]+              { yylval.valor_lexico.numero_linha = yylineno;
+                      yylval.valor_lexico.tipo = TK_LI_INTEIRO;
+                      yylval.valor_lexico.value = strdup(yytext);
+                      return TK_LI_INTEIRO; }
+
+[0-9]*"."[0-9]+     { yylval.valor_lexico.numero_linha = yylineno;
+                      yylval.valor_lexico.tipo = TK_LI_DECIMAL;
+                      yylval.valor_lexico.value = strdup(yytext);
+                      return TK_LI_DECIMAL; }
 
 .                   {return TK_ER; }
 
