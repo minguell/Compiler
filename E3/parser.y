@@ -1,21 +1,22 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "asd.h"
 
 int yylex(void);
 void yyerror (char const *mensagem);
 int get_line_number();
 
-extern asd_tree_t *arvore; 
+%}
 
-typedef struct {
+%code requires {
+    #include "asd.h"
+    extern asd_tree_t *arvore; 
+    typedef struct {
         int numero_linha;
         int tipo;
         char* valor;
-} Valor_Lexico;
-%}
-
+    } valor_lexico;
+}
 
 %define parse.error verbose
 %token TK_TIPO
@@ -39,7 +40,7 @@ typedef struct {
 %token TK_ER
 
 %union {
-        Valor_Lexico valor_lexico;
+        valor_lexico valor_lexico;
         asd_tree_t* nodo_arvore;
 }
 
@@ -58,7 +59,7 @@ programa: lista ';'	{ arvore = $1;}
         ;
         
 lista: elemento		{ $$ = $1; }
-     | lista ',' elemento	{ $$ = $1; asd_add_child($$, $3);}
+     | elemento ',' lista	{ asd_add_child($1, $3); $$ = $1; }
      ;
      
 elemento: declaracao_variavel	{ $$ = $1; }
@@ -75,7 +76,9 @@ declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
 
 declaracao_funcao: cabecalho_funcao bloco_de_comandos {
                         $$ = $1;
-                        asd_add_child($$, $2); 
+                        if ($2 != NULL){
+                              asd_add_child($$, $2); 
+                         }
                    };
 
 cabecalho_funcao: TK_ID TK_SETA tipo_num lista_parametros_opcional TK_ATRIB {
@@ -95,7 +98,7 @@ lista_parametros: TK_COM parametros		{ $$ = $2; }
                 ;
                 
 parametros: parametro				{ $$ = $1; }
-          | parametros ',' parametro		{ $$ = $1; asd_add_child($$, $3); }
+          | parametro ',' parametros		{ asd_add_child($1, $3); $$ = $1; }
           ;
 
 parametro: TK_ID TK_ATRIB tipo_num		{
@@ -112,8 +115,7 @@ bloco_de_comandos: '[' ']' 			{ $$ = NULL; }
                  ;
                  
 sequencia_comandos: comando			{ $$ = $1; }
-                  | sequencia_comandos comando	{ $$ = $1; asd_add_child($$, $2);}
-                  ;
+                  | comando sequencia_comandos	{ asd_add_child($1, $2); $$ = $1; }
                   
 comando: matched_statement			{ $$ = $1; }
        | unmatched_statement			{ $$ = $1; }
@@ -155,8 +157,8 @@ outro_comando: bloco_de_comandos		{ $$ = $1; }
 declaracao_variavel_comando: declaracao_variavel			{ $$ = $1; }
                            | declaracao_variavel TK_COM literal			{ 
                                 $$ = asd_new("com"); 
-                                asd_add_child($1, $3);
-                                $$ = $1; 
+                                asd_add_child($$, $1);
+                                asd_add_child($$, $3);
                            }
                            ;
 
@@ -164,7 +166,7 @@ literal: TK_LI_INTEIRO 		{ $$ = asd_new($1.valor); free($1.valor);}
 	| TK_LI_DECIMAL			{ $$ = asd_new($1.valor); free($1.valor);} 
 ;
 
-atribuicao: TK_ID TK_ATRIB expressao; { 
+atribuicao: TK_ID TK_ATRIB expressao { 
                 $$ = asd_new(":="); 
                 asd_tree_t* id_node = asd_new($1.valor);
                 asd_add_child($$, id_node); 
@@ -188,12 +190,13 @@ chamada_funcao: TK_ID '(' ')'		{
               ;
               
 argumentos: expressao				{ $$ = $1; }
-          | argumentos ',' expressao		{ $$ = $1; asd_add_child($$, $3);}
+          | expressao ',' argumentos		{ asd_add_child($1, $3); $$ = $1; }
           ;
           
 retorno: TK_RETORNA expressao TK_ATRIB tipo_num { 
             $$ = asd_new("retorna"); 
-            asd_add_child($$, $2); 
+            asd_add_child($$, $2);
+            asd_free($4);
          };
 ;
 
@@ -249,7 +252,7 @@ expr_unaria: '+' fator		{ $$ = asd_new("+"); asd_add_child($$, $2); }
            ;
 
 /* Fator: nível mais alto de precedência (literais, IDs, parênteses) */
-fator: TK_ID
+fator: TK_ID                  { $$ = asd_new($1.valor); free($1.valor); }
      | literal			{ $$ = $1; }
      | chamada_funcao		{ $$ = $1; }
      | '(' expressao ')'	{ $$ = $2; }

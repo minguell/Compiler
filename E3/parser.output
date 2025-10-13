@@ -12,7 +12,7 @@ Grammar
     2         | ε
 
     3 lista: elemento
-    4      | lista ',' elemento
+    4      | elemento ',' lista
 
     5 elemento: declaracao_variavel
     6         | declaracao_funcao
@@ -30,15 +30,15 @@ Grammar
    13                 | parametros
 
    14 parametros: parametro
-   15           | parametros ',' parametro
+   15           | parametro ',' parametros
 
    16 parametro: TK_ID TK_ATRIB tipo_num
 
-   17 bloco_de_comandos: '{' '}'
-   18                  | '{' sequencia_comandos '}'
+   17 bloco_de_comandos: '[' ']'
+   18                  | '[' sequencia_comandos ']'
 
    19 sequencia_comandos: comando
-   20                   | sequencia_comandos comando
+   20                   | comando sequencia_comandos
 
    21 comando: matched_statement
    22        | unmatched_statement
@@ -51,13 +51,13 @@ Grammar
 
    27 outro_comando: bloco_de_comandos
    28              | declaracao_variavel_comando
-   29              | atribuicao ';'
-   30              | chamada_funcao ';'
+   29              | atribuicao
+   30              | chamada_funcao
    31              | retorno
    32              | repeticao
 
-   33 declaracao_variavel_comando: declaracao_variavel ';'
-   34                            | declaracao_variavel TK_COM literal ';'
+   33 declaracao_variavel_comando: declaracao_variavel
+   34                            | declaracao_variavel TK_COM literal
 
    35 literal: TK_LI_INTEIRO
    36        | TK_LI_DECIMAL
@@ -68,9 +68,9 @@ Grammar
    39               | TK_ID '(' argumentos ')'
 
    40 argumentos: expressao
-   41           | argumentos ',' expressao
+   41           | expressao ',' argumentos
 
-   42 retorno: TK_RETORNA expressao TK_ATRIB tipo_num ';'
+   42 retorno: TK_RETORNA expressao TK_ATRIB tipo_num
 
    43 repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos
 
@@ -128,12 +128,12 @@ Terminals, with rules where they appear
     ',' (44) 4 15 41
     '-' (45) 60 67
     '/' (47) 63
-    ';' (59) 1 29 30 33 34 42
+    ';' (59) 1
     '<' (60) 54
     '>' (62) 55
-    '{' (123) 17 18
+    '[' (91) 17 18
+    ']' (93) 17 18
     '|' (124) 47
-    '}' (125) 17 18
     error (256)
     TK_TIPO (258)
     TK_VAR (259) 7
@@ -150,9 +150,9 @@ Terminals, with rules where they appear
     TK_OC_GE (270) 57
     TK_OC_EQ (271) 51
     TK_OC_NE (272) 52
-    TK_ID (273) 7 9 16 37 38 39 70
-    TK_LI_INTEIRO (274) 35
-    TK_LI_DECIMAL (275) 36
+    TK_ID <valor_lexico> (273) 7 9 16 37 38 39 70
+    TK_LI_INTEIRO <valor_lexico> (274) 35
+    TK_LI_DECIMAL <valor_lexico> (275) 36
     TK_ER (276)
 
 
@@ -160,103 +160,103 @@ Nonterminals, with rules where they appear
 
     $accept (38)
         on left: 0
-    programa (39)
+    programa <nodo_arvore> (39)
         on left: 1 2
         on right: 0
-    lista (40)
+    lista <nodo_arvore> (40)
         on left: 3 4
         on right: 1 4
-    elemento (41)
+    elemento <nodo_arvore> (41)
         on left: 5 6
         on right: 3 4
-    declaracao_variavel (42)
+    declaracao_variavel <nodo_arvore> (42)
         on left: 7
         on right: 5 33 34
-    declaracao_funcao (43)
+    declaracao_funcao <nodo_arvore> (43)
         on left: 8
         on right: 6
-    cabecalho_funcao (44)
+    cabecalho_funcao <nodo_arvore> (44)
         on left: 9
         on right: 8
-    lista_parametros_opcional (45)
+    lista_parametros_opcional <nodo_arvore> (45)
         on left: 10 11
         on right: 9
-    lista_parametros (46)
+    lista_parametros <nodo_arvore> (46)
         on left: 12 13
         on right: 10
-    parametros (47)
+    parametros <nodo_arvore> (47)
         on left: 14 15
         on right: 12 13 15
-    parametro (48)
+    parametro <nodo_arvore> (48)
         on left: 16
         on right: 14 15
-    bloco_de_comandos (49)
+    bloco_de_comandos <nodo_arvore> (49)
         on left: 17 18
         on right: 8 27 43
-    sequencia_comandos (50)
+    sequencia_comandos <nodo_arvore> (50)
         on left: 19 20
         on right: 18 20
-    comando (51)
+    comando <nodo_arvore> (51)
         on left: 21 22
         on right: 19 20 25
-    matched_statement (52)
+    matched_statement <nodo_arvore> (52)
         on left: 23 24
         on right: 21 23 26
-    unmatched_statement (53)
+    unmatched_statement <nodo_arvore> (53)
         on left: 25 26
         on right: 22 26
-    outro_comando (54)
+    outro_comando <nodo_arvore> (54)
         on left: 27 28 29 30 31 32
         on right: 24
-    declaracao_variavel_comando (55)
+    declaracao_variavel_comando <nodo_arvore> (55)
         on left: 33 34
         on right: 28
-    literal (56)
+    literal <nodo_arvore> (56)
         on left: 35 36
         on right: 34 71
-    atribuicao (57)
+    atribuicao <nodo_arvore> (57)
         on left: 37
         on right: 29
-    chamada_funcao (58)
+    chamada_funcao <nodo_arvore> (58)
         on left: 38 39
         on right: 30 72
-    argumentos (59)
+    argumentos <nodo_arvore> (59)
         on left: 40 41
         on right: 39 41
-    retorno (60)
+    retorno <nodo_arvore> (60)
         on left: 42
         on right: 31
-    repeticao (61)
+    repeticao <nodo_arvore> (61)
         on left: 43
         on right: 32
-    tipo_num (62)
+    tipo_num <nodo_arvore> (62)
         on left: 44 45
         on right: 7 9 16 42
-    expressao (63)
+    expressao <nodo_arvore> (63)
         on left: 46
         on right: 23 25 26 37 40 41 42 43 73
-    expr_logica_ou (64)
+    expr_logica_ou <nodo_arvore> (64)
         on left: 47 48
         on right: 46 47
-    expr_logica_e (65)
+    expr_logica_e <nodo_arvore> (65)
         on left: 49 50
         on right: 47 48 49
-    expr_igualdade (66)
+    expr_igualdade <nodo_arvore> (66)
         on left: 51 52 53
         on right: 49 50 51 52
-    expr_relacional (67)
+    expr_relacional <nodo_arvore> (67)
         on left: 54 55 56 57 58
         on right: 51 52 53 54 55 56 57
-    expr_aditiva (68)
+    expr_aditiva <nodo_arvore> (68)
         on left: 59 60 61
         on right: 54 55 56 57 58 59 60
-    expr_multiplicativa (69)
+    expr_multiplicativa <nodo_arvore> (69)
         on left: 62 63 64 65
         on right: 59 60 61 62 63 64
-    expr_unaria (70)
+    expr_unaria <nodo_arvore> (70)
         on left: 66 67 68 69
         on right: 62 63 64 65
-    fator (71)
+    fator <nodo_arvore> (71)
         on left: 70 71 72 73
         on right: 66 67 68 69
 
@@ -302,15 +302,16 @@ State 3
 State 4
 
     1 programa: lista • ';'
-    4 lista: lista • ',' elemento
 
     ';'  shift, and go to state 12
-    ','  shift, and go to state 13
 
 
 State 5
 
     3 lista: elemento •
+    4      | elemento • ',' lista
+
+    ','  shift, and go to state 13
 
     $default  reduce using rule 3 (lista)
 
@@ -333,7 +334,7 @@ State 8
 
     8 declaracao_funcao: cabecalho_funcao • bloco_de_comandos
 
-    '{'  shift, and go to state 14
+    '['  shift, and go to state 14
 
     bloco_de_comandos  go to state 15
 
@@ -371,12 +372,13 @@ State 12
 
 State 13
 
-    4 lista: lista ',' • elemento
+    4 lista: elemento ',' • lista
 
     TK_VAR  shift, and go to state 1
     TK_ID   shift, and go to state 2
 
-    elemento             go to state 20
+    lista                go to state 20
+    elemento             go to state 5
     declaracao_variavel  go to state 6
     declaracao_funcao    go to state 7
     cabecalho_funcao     go to state 8
@@ -384,16 +386,16 @@ State 13
 
 State 14
 
-   17 bloco_de_comandos: '{' • '}'
-   18                  | '{' • sequencia_comandos '}'
+   17 bloco_de_comandos: '[' • ']'
+   18                  | '[' • sequencia_comandos ']'
 
     TK_VAR       shift, and go to state 1
     TK_SE        shift, and go to state 21
     TK_RETORNA   shift, and go to state 22
     TK_ENQUANTO  shift, and go to state 23
     TK_ID        shift, and go to state 24
-    '{'          shift, and go to state 14
-    '}'          shift, and go to state 25
+    '['          shift, and go to state 14
+    ']'          shift, and go to state 25
 
     declaracao_variavel          go to state 26
     bloco_de_comandos            go to state 27
@@ -457,7 +459,7 @@ State 19
 
 State 20
 
-    4 lista: lista ',' elemento •
+    4 lista: elemento ',' lista •
 
     $default  reduce using rule 4 (lista)
 
@@ -473,7 +475,7 @@ State 21
 
 State 22
 
-   42 retorno: TK_RETORNA • expressao TK_ATRIB tipo_num ';'
+   42 retorno: TK_RETORNA • expressao TK_ATRIB tipo_num
 
     TK_ID          shift, and go to state 46
     TK_LI_INTEIRO  shift, and go to state 47
@@ -515,18 +517,19 @@ State 24
 
 State 25
 
-   17 bloco_de_comandos: '{' '}' •
+   17 bloco_de_comandos: '[' ']' •
 
     $default  reduce using rule 17 (bloco_de_comandos)
 
 
 State 26
 
-   33 declaracao_variavel_comando: declaracao_variavel • ';'
-   34                            | declaracao_variavel • TK_COM literal ';'
+   33 declaracao_variavel_comando: declaracao_variavel •
+   34                            | declaracao_variavel • TK_COM literal
 
     TK_COM  shift, and go to state 67
-    ';'     shift, and go to state 68
+
+    $default  reduce using rule 33 (declaracao_variavel_comando)
 
 
 State 27
@@ -538,20 +541,29 @@ State 27
 
 State 28
 
-   18 bloco_de_comandos: '{' sequencia_comandos • '}'
-   20 sequencia_comandos: sequencia_comandos • comando
+   18 bloco_de_comandos: '[' sequencia_comandos • ']'
+
+    ']'  shift, and go to state 68
+
+
+State 29
+
+   19 sequencia_comandos: comando •
+   20                   | comando • sequencia_comandos
 
     TK_VAR       shift, and go to state 1
     TK_SE        shift, and go to state 21
     TK_RETORNA   shift, and go to state 22
     TK_ENQUANTO  shift, and go to state 23
     TK_ID        shift, and go to state 24
-    '{'          shift, and go to state 14
-    '}'          shift, and go to state 69
+    '['          shift, and go to state 14
+
+    $default  reduce using rule 19 (sequencia_comandos)
 
     declaracao_variavel          go to state 26
     bloco_de_comandos            go to state 27
-    comando                      go to state 70
+    sequencia_comandos           go to state 69
+    comando                      go to state 29
     matched_statement            go to state 30
     unmatched_statement          go to state 31
     outro_comando                go to state 32
@@ -560,13 +572,6 @@ State 28
     chamada_funcao               go to state 35
     retorno                      go to state 36
     repeticao                    go to state 37
-
-
-State 29
-
-   19 sequencia_comandos: comando •
-
-    $default  reduce using rule 19 (sequencia_comandos)
 
 
 State 30
@@ -599,16 +604,16 @@ State 33
 
 State 34
 
-   29 outro_comando: atribuicao • ';'
+   29 outro_comando: atribuicao •
 
-    ';'  shift, and go to state 71
+    $default  reduce using rule 29 (outro_comando)
 
 
 State 35
 
-   30 outro_comando: chamada_funcao • ';'
+   30 outro_comando: chamada_funcao •
 
-    ';'  shift, and go to state 72
+    $default  reduce using rule 30 (outro_comando)
 
 
 State 36
@@ -638,7 +643,7 @@ State 39
 
     TK_ID  shift, and go to state 40
 
-    parametros  go to state 73
+    parametros  go to state 70
     parametro   go to state 44
 
 
@@ -646,14 +651,14 @@ State 40
 
    16 parametro: TK_ID • TK_ATRIB tipo_num
 
-    TK_ATRIB  shift, and go to state 74
+    TK_ATRIB  shift, and go to state 71
 
 
 State 41
 
     9 cabecalho_funcao: TK_ID TK_SETA tipo_num lista_parametros_opcional • TK_ATRIB
 
-    TK_ATRIB  shift, and go to state 75
+    TK_ATRIB  shift, and go to state 72
 
 
 State 42
@@ -666,9 +671,6 @@ State 42
 State 43
 
    13 lista_parametros: parametros •
-   15 parametros: parametros • ',' parametro
-
-    ','  shift, and go to state 76
 
     $default  reduce using rule 13 (lista_parametros)
 
@@ -676,6 +678,9 @@ State 43
 State 44
 
    14 parametros: parametro •
+   15           | parametro • ',' parametros
+
+    ','  shift, and go to state 73
 
     $default  reduce using rule 14 (parametros)
 
@@ -696,7 +701,7 @@ State 45
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expressao            go to state 77
+    expressao            go to state 74
     expr_logica_ou       go to state 56
     expr_logica_e        go to state 57
     expr_igualdade       go to state 58
@@ -746,7 +751,7 @@ State 49
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expressao            go to state 78
+    expressao            go to state 75
     expr_logica_ou       go to state 56
     expr_logica_e        go to state 57
     expr_igualdade       go to state 58
@@ -768,7 +773,7 @@ State 50
 
     literal         go to state 53
     chamada_funcao  go to state 54
-    fator           go to state 79
+    fator           go to state 76
 
 
 State 51
@@ -782,7 +787,7 @@ State 51
 
     literal         go to state 53
     chamada_funcao  go to state 54
-    fator           go to state 80
+    fator           go to state 77
 
 
 State 52
@@ -796,7 +801,7 @@ State 52
 
     literal         go to state 53
     chamada_funcao  go to state 54
-    fator           go to state 81
+    fator           go to state 78
 
 
 State 53
@@ -815,9 +820,9 @@ State 54
 
 State 55
 
-   42 retorno: TK_RETORNA expressao • TK_ATRIB tipo_num ';'
+   42 retorno: TK_RETORNA expressao • TK_ATRIB tipo_num
 
-    TK_ATRIB  shift, and go to state 82
+    TK_ATRIB  shift, and go to state 79
 
 
 State 56
@@ -825,7 +830,7 @@ State 56
    46 expressao: expr_logica_ou •
    47 expr_logica_ou: expr_logica_ou • '|' expr_logica_e
 
-    '|'  shift, and go to state 83
+    '|'  shift, and go to state 80
 
     $default  reduce using rule 46 (expressao)
 
@@ -835,7 +840,7 @@ State 57
    48 expr_logica_ou: expr_logica_e •
    49 expr_logica_e: expr_logica_e • '&' expr_igualdade
 
-    '&'  shift, and go to state 84
+    '&'  shift, and go to state 81
 
     $default  reduce using rule 48 (expr_logica_ou)
 
@@ -846,8 +851,8 @@ State 58
    51 expr_igualdade: expr_igualdade • TK_OC_EQ expr_relacional
    52               | expr_igualdade • TK_OC_NE expr_relacional
 
-    TK_OC_EQ  shift, and go to state 85
-    TK_OC_NE  shift, and go to state 86
+    TK_OC_EQ  shift, and go to state 82
+    TK_OC_NE  shift, and go to state 83
 
     $default  reduce using rule 50 (expr_logica_e)
 
@@ -860,10 +865,10 @@ State 59
    56                | expr_relacional • TK_OC_LE expr_aditiva
    57                | expr_relacional • TK_OC_GE expr_aditiva
 
-    TK_OC_LE  shift, and go to state 87
-    TK_OC_GE  shift, and go to state 88
-    '<'       shift, and go to state 89
-    '>'       shift, and go to state 90
+    TK_OC_LE  shift, and go to state 84
+    TK_OC_GE  shift, and go to state 85
+    '<'       shift, and go to state 86
+    '>'       shift, and go to state 87
 
     $default  reduce using rule 53 (expr_igualdade)
 
@@ -874,8 +879,8 @@ State 60
    59 expr_aditiva: expr_aditiva • '+' expr_multiplicativa
    60             | expr_aditiva • '-' expr_multiplicativa
 
-    '+'  shift, and go to state 91
-    '-'  shift, and go to state 92
+    '+'  shift, and go to state 88
+    '-'  shift, and go to state 89
 
     $default  reduce using rule 58 (expr_relacional)
 
@@ -887,9 +892,9 @@ State 61
    63                    | expr_multiplicativa • '/' expr_unaria
    64                    | expr_multiplicativa • '%' expr_unaria
 
-    '*'  shift, and go to state 93
-    '/'  shift, and go to state 94
-    '%'  shift, and go to state 95
+    '*'  shift, and go to state 90
+    '/'  shift, and go to state 91
+    '%'  shift, and go to state 92
 
     $default  reduce using rule 61 (expr_aditiva)
 
@@ -922,7 +927,7 @@ State 64
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expressao            go to state 96
+    expressao            go to state 93
     expr_logica_ou       go to state 56
     expr_logica_e        go to state 57
     expr_igualdade       go to state 58
@@ -947,7 +952,7 @@ State 65
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expressao            go to state 97
+    expressao            go to state 94
     expr_logica_ou       go to state 56
     expr_logica_e        go to state 57
     expr_igualdade       go to state 58
@@ -967,15 +972,15 @@ State 66
     TK_LI_INTEIRO  shift, and go to state 47
     TK_LI_DECIMAL  shift, and go to state 48
     '('            shift, and go to state 49
-    ')'            shift, and go to state 98
+    ')'            shift, and go to state 95
     '+'            shift, and go to state 50
     '-'            shift, and go to state 51
     '!'            shift, and go to state 52
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    argumentos           go to state 99
-    expressao            go to state 100
+    argumentos           go to state 96
+    expressao            go to state 97
     expr_logica_ou       go to state 56
     expr_logica_e        go to state 57
     expr_igualdade       go to state 58
@@ -988,133 +993,110 @@ State 66
 
 State 67
 
-   34 declaracao_variavel_comando: declaracao_variavel TK_COM • literal ';'
+   34 declaracao_variavel_comando: declaracao_variavel TK_COM • literal
 
     TK_LI_INTEIRO  shift, and go to state 47
     TK_LI_DECIMAL  shift, and go to state 48
 
-    literal  go to state 101
+    literal  go to state 98
 
 
 State 68
 
-   33 declaracao_variavel_comando: declaracao_variavel ';' •
-
-    $default  reduce using rule 33 (declaracao_variavel_comando)
-
-
-State 69
-
-   18 bloco_de_comandos: '{' sequencia_comandos '}' •
+   18 bloco_de_comandos: '[' sequencia_comandos ']' •
 
     $default  reduce using rule 18 (bloco_de_comandos)
 
 
-State 70
+State 69
 
-   20 sequencia_comandos: sequencia_comandos comando •
+   20 sequencia_comandos: comando sequencia_comandos •
 
     $default  reduce using rule 20 (sequencia_comandos)
 
 
-State 71
-
-   29 outro_comando: atribuicao ';' •
-
-    $default  reduce using rule 29 (outro_comando)
-
-
-State 72
-
-   30 outro_comando: chamada_funcao ';' •
-
-    $default  reduce using rule 30 (outro_comando)
-
-
-State 73
+State 70
 
    12 lista_parametros: TK_COM parametros •
-   15 parametros: parametros • ',' parametro
-
-    ','  shift, and go to state 76
 
     $default  reduce using rule 12 (lista_parametros)
 
 
-State 74
+State 71
 
    16 parametro: TK_ID TK_ATRIB • tipo_num
 
     TK_DECIMAL  shift, and go to state 17
     TK_INTEIRO  shift, and go to state 18
 
-    tipo_num  go to state 102
+    tipo_num  go to state 99
 
 
-State 75
+State 72
 
     9 cabecalho_funcao: TK_ID TK_SETA tipo_num lista_parametros_opcional TK_ATRIB •
 
     $default  reduce using rule 9 (cabecalho_funcao)
 
 
-State 76
+State 73
 
-   15 parametros: parametros ',' • parametro
+   15 parametros: parametro ',' • parametros
 
     TK_ID  shift, and go to state 40
 
-    parametro  go to state 103
+    parametros  go to state 100
+    parametro   go to state 44
 
 
-State 77
+State 74
 
    23 matched_statement: TK_SE '(' expressao • ')' matched_statement TK_SENAO matched_statement
    25 unmatched_statement: TK_SE '(' expressao • ')' comando
    26                    | TK_SE '(' expressao • ')' matched_statement TK_SENAO unmatched_statement
 
-    ')'  shift, and go to state 104
+    ')'  shift, and go to state 101
 
 
-State 78
+State 75
 
    73 fator: '(' expressao • ')'
 
-    ')'  shift, and go to state 105
+    ')'  shift, and go to state 102
 
 
-State 79
+State 76
 
    66 expr_unaria: '+' fator •
 
     $default  reduce using rule 66 (expr_unaria)
 
 
-State 80
+State 77
 
    67 expr_unaria: '-' fator •
 
     $default  reduce using rule 67 (expr_unaria)
 
 
-State 81
+State 78
 
    68 expr_unaria: '!' fator •
 
     $default  reduce using rule 68 (expr_unaria)
 
 
-State 82
+State 79
 
-   42 retorno: TK_RETORNA expressao TK_ATRIB • tipo_num ';'
+   42 retorno: TK_RETORNA expressao TK_ATRIB • tipo_num
 
     TK_DECIMAL  shift, and go to state 17
     TK_INTEIRO  shift, and go to state 18
 
-    tipo_num  go to state 106
+    tipo_num  go to state 103
 
 
-State 83
+State 80
 
    47 expr_logica_ou: expr_logica_ou '|' • expr_logica_e
 
@@ -1128,7 +1110,7 @@ State 83
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expr_logica_e        go to state 107
+    expr_logica_e        go to state 104
     expr_igualdade       go to state 58
     expr_relacional      go to state 59
     expr_aditiva         go to state 60
@@ -1137,7 +1119,7 @@ State 83
     fator                go to state 63
 
 
-State 84
+State 81
 
    49 expr_logica_e: expr_logica_e '&' • expr_igualdade
 
@@ -1151,7 +1133,7 @@ State 84
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expr_igualdade       go to state 108
+    expr_igualdade       go to state 105
     expr_relacional      go to state 59
     expr_aditiva         go to state 60
     expr_multiplicativa  go to state 61
@@ -1159,7 +1141,7 @@ State 84
     fator                go to state 63
 
 
-State 85
+State 82
 
    51 expr_igualdade: expr_igualdade TK_OC_EQ • expr_relacional
 
@@ -1173,14 +1155,14 @@ State 85
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expr_relacional      go to state 109
+    expr_relacional      go to state 106
     expr_aditiva         go to state 60
     expr_multiplicativa  go to state 61
     expr_unaria          go to state 62
     fator                go to state 63
 
 
-State 86
+State 83
 
    52 expr_igualdade: expr_igualdade TK_OC_NE • expr_relacional
 
@@ -1194,8 +1176,68 @@ State 86
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expr_relacional      go to state 110
+    expr_relacional      go to state 107
     expr_aditiva         go to state 60
+    expr_multiplicativa  go to state 61
+    expr_unaria          go to state 62
+    fator                go to state 63
+
+
+State 84
+
+   56 expr_relacional: expr_relacional TK_OC_LE • expr_aditiva
+
+    TK_ID          shift, and go to state 46
+    TK_LI_INTEIRO  shift, and go to state 47
+    TK_LI_DECIMAL  shift, and go to state 48
+    '('            shift, and go to state 49
+    '+'            shift, and go to state 50
+    '-'            shift, and go to state 51
+    '!'            shift, and go to state 52
+
+    literal              go to state 53
+    chamada_funcao       go to state 54
+    expr_aditiva         go to state 108
+    expr_multiplicativa  go to state 61
+    expr_unaria          go to state 62
+    fator                go to state 63
+
+
+State 85
+
+   57 expr_relacional: expr_relacional TK_OC_GE • expr_aditiva
+
+    TK_ID          shift, and go to state 46
+    TK_LI_INTEIRO  shift, and go to state 47
+    TK_LI_DECIMAL  shift, and go to state 48
+    '('            shift, and go to state 49
+    '+'            shift, and go to state 50
+    '-'            shift, and go to state 51
+    '!'            shift, and go to state 52
+
+    literal              go to state 53
+    chamada_funcao       go to state 54
+    expr_aditiva         go to state 109
+    expr_multiplicativa  go to state 61
+    expr_unaria          go to state 62
+    fator                go to state 63
+
+
+State 86
+
+   54 expr_relacional: expr_relacional '<' • expr_aditiva
+
+    TK_ID          shift, and go to state 46
+    TK_LI_INTEIRO  shift, and go to state 47
+    TK_LI_DECIMAL  shift, and go to state 48
+    '('            shift, and go to state 49
+    '+'            shift, and go to state 50
+    '-'            shift, and go to state 51
+    '!'            shift, and go to state 52
+
+    literal              go to state 53
+    chamada_funcao       go to state 54
+    expr_aditiva         go to state 110
     expr_multiplicativa  go to state 61
     expr_unaria          go to state 62
     fator                go to state 63
@@ -1203,7 +1245,7 @@ State 86
 
 State 87
 
-   56 expr_relacional: expr_relacional TK_OC_LE • expr_aditiva
+   55 expr_relacional: expr_relacional '>' • expr_aditiva
 
     TK_ID          shift, and go to state 46
     TK_LI_INTEIRO  shift, and go to state 47
@@ -1223,66 +1265,6 @@ State 87
 
 State 88
 
-   57 expr_relacional: expr_relacional TK_OC_GE • expr_aditiva
-
-    TK_ID          shift, and go to state 46
-    TK_LI_INTEIRO  shift, and go to state 47
-    TK_LI_DECIMAL  shift, and go to state 48
-    '('            shift, and go to state 49
-    '+'            shift, and go to state 50
-    '-'            shift, and go to state 51
-    '!'            shift, and go to state 52
-
-    literal              go to state 53
-    chamada_funcao       go to state 54
-    expr_aditiva         go to state 112
-    expr_multiplicativa  go to state 61
-    expr_unaria          go to state 62
-    fator                go to state 63
-
-
-State 89
-
-   54 expr_relacional: expr_relacional '<' • expr_aditiva
-
-    TK_ID          shift, and go to state 46
-    TK_LI_INTEIRO  shift, and go to state 47
-    TK_LI_DECIMAL  shift, and go to state 48
-    '('            shift, and go to state 49
-    '+'            shift, and go to state 50
-    '-'            shift, and go to state 51
-    '!'            shift, and go to state 52
-
-    literal              go to state 53
-    chamada_funcao       go to state 54
-    expr_aditiva         go to state 113
-    expr_multiplicativa  go to state 61
-    expr_unaria          go to state 62
-    fator                go to state 63
-
-
-State 90
-
-   55 expr_relacional: expr_relacional '>' • expr_aditiva
-
-    TK_ID          shift, and go to state 46
-    TK_LI_INTEIRO  shift, and go to state 47
-    TK_LI_DECIMAL  shift, and go to state 48
-    '('            shift, and go to state 49
-    '+'            shift, and go to state 50
-    '-'            shift, and go to state 51
-    '!'            shift, and go to state 52
-
-    literal              go to state 53
-    chamada_funcao       go to state 54
-    expr_aditiva         go to state 114
-    expr_multiplicativa  go to state 61
-    expr_unaria          go to state 62
-    fator                go to state 63
-
-
-State 91
-
    59 expr_aditiva: expr_aditiva '+' • expr_multiplicativa
 
     TK_ID          shift, and go to state 46
@@ -1295,12 +1277,12 @@ State 91
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expr_multiplicativa  go to state 115
+    expr_multiplicativa  go to state 112
     expr_unaria          go to state 62
     fator                go to state 63
 
 
-State 92
+State 89
 
    60 expr_aditiva: expr_aditiva '-' • expr_multiplicativa
 
@@ -1314,12 +1296,12 @@ State 92
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expr_multiplicativa  go to state 116
+    expr_multiplicativa  go to state 113
     expr_unaria          go to state 62
     fator                go to state 63
 
 
-State 93
+State 90
 
    62 expr_multiplicativa: expr_multiplicativa '*' • expr_unaria
 
@@ -1333,11 +1315,11 @@ State 93
 
     literal         go to state 53
     chamada_funcao  go to state 54
-    expr_unaria     go to state 117
+    expr_unaria     go to state 114
     fator           go to state 63
 
 
-State 94
+State 91
 
    63 expr_multiplicativa: expr_multiplicativa '/' • expr_unaria
 
@@ -1351,11 +1333,11 @@ State 94
 
     literal         go to state 53
     chamada_funcao  go to state 54
-    expr_unaria     go to state 118
+    expr_unaria     go to state 115
     fator           go to state 63
 
 
-State 95
+State 92
 
    64 expr_multiplicativa: expr_multiplicativa '%' • expr_unaria
 
@@ -1369,69 +1351,70 @@ State 95
 
     literal         go to state 53
     chamada_funcao  go to state 54
-    expr_unaria     go to state 119
+    expr_unaria     go to state 116
     fator           go to state 63
 
 
-State 96
+State 93
 
    43 repeticao: TK_ENQUANTO '(' expressao • ')' bloco_de_comandos
 
-    ')'  shift, and go to state 120
+    ')'  shift, and go to state 117
 
 
-State 97
+State 94
 
    37 atribuicao: TK_ID TK_ATRIB expressao •
 
     $default  reduce using rule 37 (atribuicao)
 
 
-State 98
+State 95
 
    38 chamada_funcao: TK_ID '(' ')' •
 
     $default  reduce using rule 38 (chamada_funcao)
 
 
-State 99
+State 96
 
    39 chamada_funcao: TK_ID '(' argumentos • ')'
-   41 argumentos: argumentos • ',' expressao
 
-    ','  shift, and go to state 121
-    ')'  shift, and go to state 122
+    ')'  shift, and go to state 118
 
 
-State 100
+State 97
 
    40 argumentos: expressao •
+   41           | expressao • ',' argumentos
+
+    ','  shift, and go to state 119
 
     $default  reduce using rule 40 (argumentos)
 
 
-State 101
+State 98
 
-   34 declaracao_variavel_comando: declaracao_variavel TK_COM literal • ';'
+   34 declaracao_variavel_comando: declaracao_variavel TK_COM literal •
 
-    ';'  shift, and go to state 123
+    $default  reduce using rule 34 (declaracao_variavel_comando)
 
 
-State 102
+State 99
 
    16 parametro: TK_ID TK_ATRIB tipo_num •
 
     $default  reduce using rule 16 (parametro)
 
 
-State 103
+State 100
 
-   15 parametros: parametros ',' parametro •
+   15 parametros: parametro ',' parametros •
 
     $default  reduce using rule 15 (parametros)
 
 
-State 104
+State 101
 
    23 matched_statement: TK_SE '(' expressao ')' • matched_statement TK_SENAO matched_statement
    25 unmatched_statement: TK_SE '(' expressao ')' • comando
@@ -1442,12 +1425,12 @@ State 104
     TK_RETORNA   shift, and go to state 22
     TK_ENQUANTO  shift, and go to state 23
     TK_ID        shift, and go to state 24
-    '{'          shift, and go to state 14
+    '['          shift, and go to state 14
 
     declaracao_variavel          go to state 26
     bloco_de_comandos            go to state 27
-    comando                      go to state 124
-    matched_statement            go to state 125
+    comando                      go to state 120
+    matched_statement            go to state 121
     unmatched_statement          go to state 31
     outro_comando                go to state 32
     declaracao_variavel_comando  go to state 33
@@ -1457,43 +1440,43 @@ State 104
     repeticao                    go to state 37
 
 
-State 105
+State 102
 
    73 fator: '(' expressao ')' •
 
     $default  reduce using rule 73 (fator)
 
 
-State 106
+State 103
 
-   42 retorno: TK_RETORNA expressao TK_ATRIB tipo_num • ';'
+   42 retorno: TK_RETORNA expressao TK_ATRIB tipo_num •
 
-    ';'  shift, and go to state 126
+    $default  reduce using rule 42 (retorno)
 
 
-State 107
+State 104
 
    47 expr_logica_ou: expr_logica_ou '|' expr_logica_e •
    49 expr_logica_e: expr_logica_e • '&' expr_igualdade
 
-    '&'  shift, and go to state 84
+    '&'  shift, and go to state 81
 
     $default  reduce using rule 47 (expr_logica_ou)
 
 
-State 108
+State 105
 
    49 expr_logica_e: expr_logica_e '&' expr_igualdade •
    51 expr_igualdade: expr_igualdade • TK_OC_EQ expr_relacional
    52               | expr_igualdade • TK_OC_NE expr_relacional
 
-    TK_OC_EQ  shift, and go to state 85
-    TK_OC_NE  shift, and go to state 86
+    TK_OC_EQ  shift, and go to state 82
+    TK_OC_NE  shift, and go to state 83
 
     $default  reduce using rule 49 (expr_logica_e)
 
 
-State 109
+State 106
 
    51 expr_igualdade: expr_igualdade TK_OC_EQ expr_relacional •
    54 expr_relacional: expr_relacional • '<' expr_aditiva
@@ -1501,15 +1484,15 @@ State 109
    56                | expr_relacional • TK_OC_LE expr_aditiva
    57                | expr_relacional • TK_OC_GE expr_aditiva
 
-    TK_OC_LE  shift, and go to state 87
-    TK_OC_GE  shift, and go to state 88
-    '<'       shift, and go to state 89
-    '>'       shift, and go to state 90
+    TK_OC_LE  shift, and go to state 84
+    TK_OC_GE  shift, and go to state 85
+    '<'       shift, and go to state 86
+    '>'       shift, and go to state 87
 
     $default  reduce using rule 51 (expr_igualdade)
 
 
-State 110
+State 107
 
    52 expr_igualdade: expr_igualdade TK_OC_NE expr_relacional •
    54 expr_relacional: expr_relacional • '<' expr_aditiva
@@ -1517,123 +1500,130 @@ State 110
    56                | expr_relacional • TK_OC_LE expr_aditiva
    57                | expr_relacional • TK_OC_GE expr_aditiva
 
-    TK_OC_LE  shift, and go to state 87
-    TK_OC_GE  shift, and go to state 88
-    '<'       shift, and go to state 89
-    '>'       shift, and go to state 90
+    TK_OC_LE  shift, and go to state 84
+    TK_OC_GE  shift, and go to state 85
+    '<'       shift, and go to state 86
+    '>'       shift, and go to state 87
 
     $default  reduce using rule 52 (expr_igualdade)
 
 
-State 111
+State 108
 
    56 expr_relacional: expr_relacional TK_OC_LE expr_aditiva •
    59 expr_aditiva: expr_aditiva • '+' expr_multiplicativa
    60             | expr_aditiva • '-' expr_multiplicativa
 
-    '+'  shift, and go to state 91
-    '-'  shift, and go to state 92
+    '+'  shift, and go to state 88
+    '-'  shift, and go to state 89
 
     $default  reduce using rule 56 (expr_relacional)
 
 
-State 112
+State 109
 
    57 expr_relacional: expr_relacional TK_OC_GE expr_aditiva •
    59 expr_aditiva: expr_aditiva • '+' expr_multiplicativa
    60             | expr_aditiva • '-' expr_multiplicativa
 
-    '+'  shift, and go to state 91
-    '-'  shift, and go to state 92
+    '+'  shift, and go to state 88
+    '-'  shift, and go to state 89
 
     $default  reduce using rule 57 (expr_relacional)
 
 
-State 113
+State 110
 
    54 expr_relacional: expr_relacional '<' expr_aditiva •
    59 expr_aditiva: expr_aditiva • '+' expr_multiplicativa
    60             | expr_aditiva • '-' expr_multiplicativa
 
-    '+'  shift, and go to state 91
-    '-'  shift, and go to state 92
+    '+'  shift, and go to state 88
+    '-'  shift, and go to state 89
 
     $default  reduce using rule 54 (expr_relacional)
 
 
-State 114
+State 111
 
    55 expr_relacional: expr_relacional '>' expr_aditiva •
    59 expr_aditiva: expr_aditiva • '+' expr_multiplicativa
    60             | expr_aditiva • '-' expr_multiplicativa
 
-    '+'  shift, and go to state 91
-    '-'  shift, and go to state 92
+    '+'  shift, and go to state 88
+    '-'  shift, and go to state 89
 
     $default  reduce using rule 55 (expr_relacional)
 
 
-State 115
+State 112
 
    59 expr_aditiva: expr_aditiva '+' expr_multiplicativa •
    62 expr_multiplicativa: expr_multiplicativa • '*' expr_unaria
    63                    | expr_multiplicativa • '/' expr_unaria
    64                    | expr_multiplicativa • '%' expr_unaria
 
-    '*'  shift, and go to state 93
-    '/'  shift, and go to state 94
-    '%'  shift, and go to state 95
+    '*'  shift, and go to state 90
+    '/'  shift, and go to state 91
+    '%'  shift, and go to state 92
 
     $default  reduce using rule 59 (expr_aditiva)
 
 
-State 116
+State 113
 
    60 expr_aditiva: expr_aditiva '-' expr_multiplicativa •
    62 expr_multiplicativa: expr_multiplicativa • '*' expr_unaria
    63                    | expr_multiplicativa • '/' expr_unaria
    64                    | expr_multiplicativa • '%' expr_unaria
 
-    '*'  shift, and go to state 93
-    '/'  shift, and go to state 94
-    '%'  shift, and go to state 95
+    '*'  shift, and go to state 90
+    '/'  shift, and go to state 91
+    '%'  shift, and go to state 92
 
     $default  reduce using rule 60 (expr_aditiva)
 
 
-State 117
+State 114
 
    62 expr_multiplicativa: expr_multiplicativa '*' expr_unaria •
 
     $default  reduce using rule 62 (expr_multiplicativa)
 
 
-State 118
+State 115
 
    63 expr_multiplicativa: expr_multiplicativa '/' expr_unaria •
 
     $default  reduce using rule 63 (expr_multiplicativa)
 
 
-State 119
+State 116
 
    64 expr_multiplicativa: expr_multiplicativa '%' expr_unaria •
 
     $default  reduce using rule 64 (expr_multiplicativa)
 
 
-State 120
+State 117
 
    43 repeticao: TK_ENQUANTO '(' expressao ')' • bloco_de_comandos
 
-    '{'  shift, and go to state 14
+    '['  shift, and go to state 14
 
-    bloco_de_comandos  go to state 127
+    bloco_de_comandos  go to state 122
 
 
-State 121
+State 118
 
-   41 argumentos: argumentos ',' • expressao
+   39 chamada_funcao: TK_ID '(' argumentos ')' •
+
+    $default  reduce using rule 39 (chamada_funcao)
+
+
+State 119
+
+   41 argumentos: expressao ',' • argumentos
 
     TK_ID          shift, and go to state 46
     TK_LI_INTEIRO  shift, and go to state 47
@@ -1645,7 +1635,8 @@ State 121
 
     literal              go to state 53
     chamada_funcao       go to state 54
-    expressao            go to state 128
+    argumentos           go to state 123
+    expressao            go to state 97
     expr_logica_ou       go to state 56
     expr_logica_e        go to state 57
     expr_igualdade       go to state 58
@@ -1656,60 +1647,39 @@ State 121
     fator                go to state 63
 
 
-State 122
-
-   39 chamada_funcao: TK_ID '(' argumentos ')' •
-
-    $default  reduce using rule 39 (chamada_funcao)
-
-
-State 123
-
-   34 declaracao_variavel_comando: declaracao_variavel TK_COM literal ';' •
-
-    $default  reduce using rule 34 (declaracao_variavel_comando)
-
-
-State 124
+State 120
 
    25 unmatched_statement: TK_SE '(' expressao ')' comando •
 
     $default  reduce using rule 25 (unmatched_statement)
 
 
-State 125
+State 121
 
    21 comando: matched_statement •
    23 matched_statement: TK_SE '(' expressao ')' matched_statement • TK_SENAO matched_statement
    26 unmatched_statement: TK_SE '(' expressao ')' matched_statement • TK_SENAO unmatched_statement
 
-    TK_SENAO  shift, and go to state 129
+    TK_SENAO  shift, and go to state 124
 
     $default  reduce using rule 21 (comando)
 
 
-State 126
-
-   42 retorno: TK_RETORNA expressao TK_ATRIB tipo_num ';' •
-
-    $default  reduce using rule 42 (retorno)
-
-
-State 127
+State 122
 
    43 repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos •
 
     $default  reduce using rule 43 (repeticao)
 
 
-State 128
+State 123
 
-   41 argumentos: argumentos ',' expressao •
+   41 argumentos: expressao ',' argumentos •
 
     $default  reduce using rule 41 (argumentos)
 
 
-State 129
+State 124
 
    23 matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO • matched_statement
    26 unmatched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO • unmatched_statement
@@ -1719,12 +1689,12 @@ State 129
     TK_RETORNA   shift, and go to state 22
     TK_ENQUANTO  shift, and go to state 23
     TK_ID        shift, and go to state 24
-    '{'          shift, and go to state 14
+    '['          shift, and go to state 14
 
     declaracao_variavel          go to state 26
     bloco_de_comandos            go to state 27
-    matched_statement            go to state 130
-    unmatched_statement          go to state 131
+    matched_statement            go to state 125
+    unmatched_statement          go to state 126
     outro_comando                go to state 32
     declaracao_variavel_comando  go to state 33
     atribuicao                   go to state 34
@@ -1733,14 +1703,14 @@ State 129
     repeticao                    go to state 37
 
 
-State 130
+State 125
 
    23 matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_statement •
 
     $default  reduce using rule 23 (matched_statement)
 
 
-State 131
+State 126
 
    26 unmatched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO unmatched_statement •
 
