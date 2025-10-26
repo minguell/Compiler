@@ -4,6 +4,13 @@
 %{
 #include "parser.tab.h"
 #include "asd.h"
+
+static int preenche_valor_lexico(int token_type) {
+    yylval.valor_lexico.numero_linha = yylineno;
+    yylval.valor_lexico.tipo = token_type;
+    yylval.valor_lexico.valor = strdup(yytext);
+    return token_type;
+}
 %}
 
 %option noyywrap
@@ -34,20 +41,11 @@
 ":="                { return TK_ATRIB; }
 "->"                { return TK_SETA; }
 
-[a-z_][a-z0-9_]*    { yylval.valor_lexico.numero_linha = yylineno;
-                      yylval.valor_lexico.tipo = TK_ID;
-                      yylval.valor_lexico.valor = strdup(yytext);
-                      return TK_ID; }
+[a-z_][a-z0-9_]*    { return preenche_valor_lexico(TK_ID);}
 
-[0-9]+              { yylval.valor_lexico.numero_linha = yylineno;
-                      yylval.valor_lexico.tipo = TK_LI_INTEIRO;
-                      yylval.valor_lexico.valor = strdup(yytext);
-                      return TK_LI_INTEIRO; }
+[0-9]+              {return preenche_valor_lexico(TK_LI_INTEIRO);}
 
-[0-9]*"."[0-9]+     { yylval.valor_lexico.numero_linha = yylineno;
-                      yylval.valor_lexico.tipo = TK_LI_DECIMAL;
-                      yylval.valor_lexico.valor = strdup(yytext);
-                      return TK_LI_DECIMAL; }
+[0-9]*"."[0-9]+     { return preenche_valor_lexico(TK_LI_DECIMAL);}
 
 .                   {return TK_ER; }
 
