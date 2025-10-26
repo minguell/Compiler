@@ -3,17 +3,19 @@
 
 EXEC = etapa3
 CC = gcc
-CFLAGS = -Wall -g
+
+CFLAGS = -Wall -g -fsanitize=address
 
 # Ferramentas
 LEX = flex
 YACC = bison
-YFLAGS = -d -v# Gera .tab.h
+YFLAGS = -d -v # Gera .tab.h
 
 # Arquivos Fonte
 LEX_SRC = scanner.l
 YACC_SRC = parser.y
 MAIN_SRC = main.c
+ASD_SRC = asd.c 
 
 # Arquivos Gerados
 LEX_OUT = lex.yy.c
@@ -25,7 +27,7 @@ OBJS = main.o lex.yy.o parser.tab.o asd.o # Arquivos Objeto
 all: $(EXEC)
 
 $(EXEC): $(OBJS)
-	$(CC) $(CFLAGS) -fsanitize=address -o $(EXEC) $(OBJS)
+	$(CC) $(CFLAGS) -o $(EXEC) $(OBJS)
 
 main.o: $(MAIN_SRC) $(YACC_OUT_H)
 	$(CC) $(CFLAGS) -c $(MAIN_SRC)
@@ -36,8 +38,8 @@ lex.yy.o: $(LEX_OUT) $(YACC_OUT_H)
 parser.tab.o: $(YACC_OUT_C)
 	$(CC) $(CFLAGS) -c $(YACC_OUT_C)
 	
-asd.o: asd.c asd.h
-	$(CC) $(CFLAGS) -c asd.c
+asd.o: $(ASD_SRC) asd.h
+	$(CC) $(CFLAGS) -c $(ASD_SRC)
 
 $(LEX_OUT): $(LEX_SRC)
 	$(LEX) -o $(LEX_OUT) $(LEX_SRC)
@@ -48,3 +50,4 @@ $(YACC_OUT_C) $(YACC_OUT_H): $(YACC_SRC)
 
 clean:
 	rm -f $(EXEC) $(OBJS) $(LEX_OUT) $(YACC_OUT_C) $(YACC_OUT_H)
+
