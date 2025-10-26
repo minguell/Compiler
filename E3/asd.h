@@ -1,3 +1,6 @@
+/* Augusto Mattei Grohmnann - 550429
+ Miguel Dutra Fontes Guerra - 342573 */
+ 
 #ifndef _ASD_H_
 #define _ASD_H_
 

@@ -1,3 +1,6 @@
+/* Augusto Mattei Grohmnann - 550429
+ Miguel Dutra Fontes Guerra - 342573 */
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
