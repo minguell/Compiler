@@ -2,8 +2,8 @@
  Miguel Dutra Fontes Guerra - 342573 */
 
 %{
-#include "parser.tab.h"
 #include "asd.h"
+#include "parser.tab.h"
 
 static int preenche_valor_lexico(int token_type) {
     yylval.valor_lexico.numero_linha = yylineno;

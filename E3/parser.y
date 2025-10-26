@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include "asd.h"
 
 int yylex(void);
 void yyerror (char const *mensagem);
@@ -22,7 +23,6 @@ asd_tree_t* asd_new_un_op(char* op, asd_tree_t* child) {
 %}
 
 %code requires {
-    #include "asd.h"
     extern asd_tree_t *arvore; 
     typedef struct {
         int numero_linha;
