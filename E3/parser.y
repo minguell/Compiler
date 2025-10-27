@@ -159,8 +159,8 @@ comando: matched_statement			{ $$ = $1; }
 matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_statement		{
                         $$ = asd_new("se"); 
                         asd_add_child($$, $3); 
-                        asd_add_child($$, $5); 
-                        asd_add_child($$, $7); 
+                        if ($5 != NULL) asd_add_child($$, $5);
+                        if ($7 != NULL) asd_add_child($$, $7);
                    }
                  | outro_comando		{ $$ = $1; }
                  ;
@@ -169,13 +169,13 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
 unmatched_statement: TK_SE '(' expressao ')' comando		{
                         $$ = asd_new("se"); 
                         asd_add_child($$, $3); 
-                        asd_add_child($$, $5); 
+                        if ($5 != NULL) asd_add_child($$, $5);
                    }
                    | TK_SE '(' expressao ')' matched_statement TK_SENAO unmatched_statement	{
                         $$ = asd_new("se");
                         asd_add_child($$, $3);
-                        asd_add_child($$, $5);
-                        asd_add_child($$, $7);
+                        if ($5 != NULL) asd_add_child($$, $5);
+                        if ($7 != NULL) asd_add_child($$, $7);
                    }
                    ;
                    
@@ -238,9 +238,9 @@ retorno: TK_RETORNA expressao TK_ATRIB tipo_num {
 
 
 repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos {	
-                $$ = asd_new("enquanto"); 
-                asd_add_child($$, $3); 
-                asd_add_child($$, $5); 
+                $$ = asd_new("enquanto");
+                asd_add_child($$, $3);
+                if ($5 != NULL) asd_add_child($$, $5);
            };;	
 
 tipo_num: TK_DECIMAL 		{ $$ = NULL; }
