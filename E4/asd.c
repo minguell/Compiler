@@ -12,6 +12,7 @@ asd_tree_t *asd_new(const char *label)
   ret = calloc(1, sizeof(asd_tree_t));
   if (ret != NULL){
     ret->label = strdup(label);
+    ret->data_type = 0;
     ret->number_of_children = 0;
     ret->children = NULL;
   }

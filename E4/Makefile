@@ -1,7 +1,7 @@
 # Augusto Mattei Grohmnann - 550429
 # Miguel Dutra Fontes Guerra - 342573 
 
-EXEC = etapa3
+EXEC = etapa4
 CC = gcc
 
 CFLAGS = -Wall -g -fsanitize=address

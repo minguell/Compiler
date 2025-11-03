@@ -6,6 +6,7 @@
 
 typedef struct asd_tree {
   char *label;
+  int data_type;
   int number_of_children;
   struct asd_tree **children;
 } asd_tree_t;
