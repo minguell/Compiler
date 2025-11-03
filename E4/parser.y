@@ -140,13 +140,13 @@ cabecalho_funcao: TK_ID TK_SETA tipo_num
                       $$ = asd_new($1.valor);
                       $$->data_type = $3;
                       
-                      if($4 != NULL) {
-                         asd_add_child($$, $4);
+                      if($5 != NULL) {
+                         asd_add_child($$, $5);
                          if(current_function)
                          {
-                             // Armazena o nó "params" ($4), não apenas o primeiro filho.
+                             // Armazena o nó "params" ($5), não apenas o primeiro filho.
                              // Isto é necessário para a check_function_call_args.
-                             current_function->params = $4; 
+                             current_function->params = $5; 
                          }
 
                       }
