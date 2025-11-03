@@ -51,9 +51,10 @@ symbol_t* add_symbol(const char* key, int line, int nature, int type) {
         exit(1);
     }
 
-    // Verifica se o símbolo já foi declarado NESTE escopo
-    if (find_symbol_in_current_scope(key) != NULL) {
-        semantic_error(ERR_DECLARED, line, key);
+    if (nature == NATURE_VARIABLE || nature == NATURE_FUNCTION) {
+        if (find_symbol_in_current_scope(key) != NULL) {
+            semantic_error(ERR_DECLARED, line, key);
+        }
     }
     
     symbol_t* new_symbol = (symbol_t*) malloc(sizeof(symbol_t));

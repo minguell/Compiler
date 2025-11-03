@@ -29,7 +29,7 @@ static symbol_t* current_function = NULL;
      // Estrutura do valor léxico vindo do scanner.l
      typedef struct {
           int numero_linha;
-          int tipo_token; // Renomeado para evitar conflito com 'tipo' da gramática
+          int token_type; // Renomeado para evitar conflito com 'tipo' da gramática
           char* valor;
      } valor_lexico;
 }
@@ -201,14 +201,6 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
                         if ($3->data_type != TYPE_INTEGER) {
                             semantic_error(ERR_WRONG_TYPE, get_line_number(), "Expressão de teste do 'se' deve ser do tipo 'inteiro'.");
                         }
-                        if ($5 != NULL && $7 != NULL) {
-                            if ($5->data_type != TYPE_UNDEFINED && 
-                                $7->data_type != TYPE_UNDEFINED && 
-                                $5->data_type != $7->data_type) {
-
-                                semantic_error(ERR_WRONG_TYPE, get_line_number(), "Tipos dos blocos 'se' e 'senao' são incompatíveis.");
-                            }
-                        }
                         $$ = asd_new("se");
                         asd_add_child($$, $3); 
                         if ($5 != NULL) asd_add_child($$, $5);
@@ -244,8 +236,8 @@ outro_comando: bloco_de_comandos { $$ = $1; }
              | repeticao { $$ = $1; }
              ;
 
-literal: TK_LI_INTEIRO { $$ = asd_new($1.valor); $$->data_type = TYPE_INTEGER; free($1.valor); }
-	   | TK_LI_DECIMAL { $$ = asd_new($1.valor); $$->data_type = TYPE_FLOAT; free($1.valor); } 
+literal: TK_LI_INTEIRO { $$ = asd_new($1.valor); $$->data_type = TYPE_INTEGER; add_symbol($1.valor, $1.numero_linha, NATURE_LITERAL, TYPE_INTEGER); free($1.valor); }
+	   | TK_LI_DECIMAL { $$ = asd_new($1.valor); $$->data_type = TYPE_FLOAT; add_symbol($1.valor, $1.numero_linha, NATURE_LITERAL, TYPE_FLOAT); free($1.valor); } 
        ;
 
 atribuicao: TK_ID TK_ATRIB expressao { 
