@@ -251,20 +251,31 @@ chamada_funcao: TK_ID '(' ')' {
                     symbol_t* symbol = find_symbol($1.valor);
                     if (symbol == NULL) semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
                     if (symbol->nature != NATURE_FUNCTION) semantic_error(ERR_VARIABLE, $1.numero_linha, $1.valor);
-                    if (symbol->params != NULL) semantic_error(ERR_MISSING_ARGS, $1.numero_linha, $1.valor);
+                    
+                    // VERIFICAÇÃO 2.5: Se a função esperava parâmetros, lança erro.
+                    if (symbol->params != NULL && symbol->params->number_of_children > 0) {
+                        semantic_error(ERR_MISSING_ARGS, $1.numero_linha, $1.valor);
+                    }
                     
                     char label[256];
                     sprintf(label, "call %s", $1.valor);
                     $$ = asd_new(label);
                     $$->data_type = symbol->type;
                     free($1.valor);
-              }
+                }
               | TK_ID '(' argumentos ')' {
                     // Ação Semântica: Verifica a chamada de função com argumentos
                     symbol_t* symbol = find_symbol($1.valor);
                     if (symbol == NULL) semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
                     if (symbol->nature != NATURE_FUNCTION) semantic_error(ERR_VARIABLE, $1.numero_linha, $1.valor);
-                    // Lógica para verificar número e tipo dos argumentos...
+                    
+                    // VERIFICAÇÃO 2.5: Se a função não esperava parâmetros, lança erro.
+                    if (symbol->params == NULL || symbol->params->number_of_children == 0) {
+                        semantic_error(ERR_EXCESS_ARGS, $1.numero_linha, $1.valor);
+                    }
+                    
+                    // Chama a função auxiliar para verificar número e tipo dos argumentos
+                    check_function_call_args(symbol, $3, $1.numero_linha);
                     
                     char label[256];
                     sprintf(label, "call %s", $1.valor);
@@ -272,7 +283,7 @@ chamada_funcao: TK_ID '(' ')' {
                     $$->data_type = symbol->type;
                     asd_add_child($$, $3); 
                     free($1.valor);
-              }
+                }
               ;
               
 argumentos: expressao                { $$ = $1; }
@@ -356,6 +367,46 @@ fator: TK_ID {
      | '(' expressao ')' { $$ = $2; }
      ;
 %%
+
+
+void check_function_call_args(symbol_t* func_symbol, asd_tree_t* args_node, int line) {
+    // Ponteiro para a lista de parâmetros da declaração da função
+    // O nó 'params' tem os parâmetros reais como filhos
+    asd_tree_t* param_list = func_symbol->params;
+    int param_index = 0;
+
+    // Ponteiro para a lista de argumentos da chamada atual
+    asd_tree_t* current_arg = args_node;
+    
+    // Percorre as duas listas simultaneamente
+    while (current_arg != NULL && param_list != NULL && param_index < param_list->number_of_children) {
+        asd_tree_t* current_param = param_list->children[param_index];
+
+        // 3. Verifica a compatibilidade de tipos
+        if (current_param->data_type != current_arg->data_type) {
+            semantic_error(ERR_WRONG_TYPE_ARGS, line, func_symbol->key);
+        }
+
+        // Avança para o próximo argumento e próximo parâmetro
+        if (current_arg->number_of_children > 0) {
+            current_arg = current_arg->children[0];
+        } else {
+            current_arg = NULL;
+        }
+        param_index++;
+    }
+
+    // 4. Verifica o número de argumentos vs. parâmetros
+    // Caso 1: Menos argumentos que o necessário
+    if (current_arg == NULL && param_index < param_list->number_of_children) {
+        semantic_error(ERR_MISSING_ARGS, line, func_symbol->key);
+    }
+
+    // Caso 2: Mais argumentos que o necessário
+    if (current_arg != NULL && param_index >= param_list->number_of_children) {
+        semantic_error(ERR_EXCESS_ARGS, line, func_symbol->key);
+    }
+}
 
 // Implementação das funções auxiliares
 void yyerror (char const *mensagem) {
