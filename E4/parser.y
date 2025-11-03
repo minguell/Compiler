@@ -135,7 +135,7 @@ cabecalho_funcao: TK_ID TK_SETA tipo_num
                       current_function = add_symbol($1.valor, $1.numero_linha, NATURE_FUNCTION, $3);
                       push_scope();
                   }
-                  lista_parametros_opcional TK_ATRIB 
+                  lista_parametros_opcional TK_ATRIB
                   {
                       $$ = asd_new($1.valor);
                       $$->data_type = $3;
@@ -152,7 +152,6 @@ cabecalho_funcao: TK_ID TK_SETA tipo_num
                       }
                       free($1.valor);
                   }
-                  '[' 
                 ;
 
 
