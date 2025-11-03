@@ -127,23 +127,26 @@ declaracao_funcao: cabecalho_funcao bloco_de_comandos {
                         pop_scope(); // Fim do escopo da função
                    };
 
-cabecalho_funcao: TK_ID TK_SETA tipo_num lista_parametros_opcional TK_ATRIB {
-                        // Ação Semântica: Adiciona a função ao escopo PAI
-                        symbol_t* func_symbol = add_symbol($1.valor, $1.numero_linha, NATURE_FUNCTION, $3);
-                        
-                        $$ = asd_new($1.valor);
-                        $$->data_type = $3;
-                        
-                        // Adiciona parâmetros como filhos do nó da função para referência
-                        if($4 != NULL) {
-                           asd_add_child($$, $4);
-                           // Ação Semântica: Salva os parâmetros no símbolo da função
-                           func_symbol->params = $4->children[0]; // Assume que o primeiro filho é a lista de params
-                        }
-                        
-                        free($1.valor);
+cabecalho_funcao: TK_ID TK_SETA tipo_num 
+                  {
+                      add_symbol($1.valor, $1.numero_linha, NATURE_FUNCTION, $3);
+                      push_scope(); 
                   }
-                  '[' { push_scope(); } // Início do escopo da função, após os parâmetros serem adicionados ao escopo
+                  lista_parametros_opcional TK_ATRIB 
+                  {
+                      $$ = asd_new($1.valor);
+                      $$->data_type = $3;
+                      
+                      if($4 != NULL) {
+                         asd_add_child($$, $4);
+                         symbol_t* func_symbol = find_symbol($1.valor);
+                         if (func_symbol) {
+                            func_symbol->params = $4->children[0]; 
+                         }
+                      }
+                      free($1.valor);
+                  }
+                  '[' // O { push_scope(); } [cite: 141] foi removido daqui
                 ;
 
 
