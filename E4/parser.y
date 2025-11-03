@@ -201,6 +201,14 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
                         if ($3->data_type != TYPE_INTEGER) {
                             semantic_error(ERR_WRONG_TYPE, get_line_number(), "Expressão de teste do 'se' deve ser do tipo 'inteiro'.");
                         }
+                        if ($5 != NULL && $7 != NULL) {
+                            if ($5->data_type != TYPE_UNDEFINED && 
+                                $7->data_type != TYPE_UNDEFINED && 
+                                $5->data_type != $7->data_type) {
+
+                                semantic_error(ERR_WRONG_TYPE, get_line_number(), "Tipos dos blocos 'se' e 'senao' são incompatíveis.");
+                            }
+                        }
                         $$ = asd_new("se");
                         asd_add_child($$, $3); 
                         if ($5 != NULL) asd_add_child($$, $5);
