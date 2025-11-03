@@ -7,7 +7,7 @@
 
 static int preenche_valor_lexico(int token_type) {
     yylval.valor_lexico.numero_linha = yylineno;
-    yylval.valor_lexico.tipo = token_type;
+    yylval.valor_lexico.token_type = token_type;
     yylval.valor_lexico.valor = strdup(yytext);
     return token_type;
 }
