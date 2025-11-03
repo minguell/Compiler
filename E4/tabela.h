@@ -8,7 +8,6 @@
 #define TYPE_UNDEFINED 0
 #define TYPE_INTEGER   1
 #define TYPE_FLOAT     2
-#define TYPE_BOOL      3 
 
 // Constantes para a natureza dos símbolos
 #define NATURE_UNDEFINED   0

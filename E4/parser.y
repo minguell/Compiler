@@ -18,6 +18,8 @@ static asd_tree_t* asd_new_unary_op(const char* label, asd_tree_t* child);
 
 // Função auxiliar para verificação de tipos em operações binárias
 void check_types(asd_tree_t* node, asd_tree_t* child1, asd_tree_t* child2);
+void check_function_call_args(symbol_t* func_symbol, asd_tree_t* args_node, int line);
+static symbol_t* current_function = NULL;
 %}
 
 %code requires {
@@ -124,13 +126,14 @@ declaracao_funcao: cabecalho_funcao bloco_de_comandos {
                         if ($2 != NULL){
                               asd_add_child($$, $2);
                         }
-                        pop_scope(); // Fim do escopo da função
+                        pop_scope();
+                        current_function = NULL;
                    };
 
 cabecalho_funcao: TK_ID TK_SETA tipo_num 
                   {
-                      add_symbol($1.valor, $1.numero_linha, NATURE_FUNCTION, $3);
-                      push_scope(); 
+                      current_function = add_symbol($1.valor, $1.numero_linha, NATURE_FUNCTION, $3);
+                      push_scope();
                   }
                   lista_parametros_opcional TK_ATRIB 
                   {
@@ -139,14 +142,17 @@ cabecalho_funcao: TK_ID TK_SETA tipo_num
                       
                       if($4 != NULL) {
                          asd_add_child($$, $4);
-                         symbol_t* func_symbol = find_symbol($1.valor);
-                         if (func_symbol) {
-                            func_symbol->params = $4->children[0]; 
+                         if(current_function)
+                         {
+                             // Armazena o nó "params" ($4), não apenas o primeiro filho.
+                             // Isto é necessário para a check_function_call_args.
+                             current_function->params = $4; 
                          }
+
                       }
                       free($1.valor);
                   }
-                  '[' // O { push_scope(); } [cite: 141] foi removido daqui
+                  '[' 
                 ;
 
 
@@ -159,7 +165,7 @@ lista_parametros: TK_COM parametros { $$ = $2; }
                 ;
 
 parametros: parametro                { $$ = asd_new("params"); asd_add_child($$, $1); }
-          | parametro ',' parametros { asd_add_child($1, $3->children[0]); free($3); $$ = $1; }
+          | parametro ',' parametros { asd_add_child($1, $3); $$ = $1; }
           ;
 
 parametro: TK_ID TK_ATRIB tipo_num {
@@ -192,6 +198,17 @@ comando: matched_statement   { $$ = $1; }
        ;
        
 matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_statement {
+                        if ($3->data_type != TYPE_INTEGER) {
+                            semantic_error(ERR_WRONG_TYPE, get_line_number(), "Expressão de teste do 'se' deve ser do tipo 'inteiro'.");
+                        }
+                        if ($5 != NULL && $7 != NULL) {
+                            if ($5->data_type != TYPE_UNDEFINED && 
+                                $7->data_type != TYPE_UNDEFINED && 
+                                $5->data_type != $7->data_type) {
+
+                                semantic_error(ERR_WRONG_TYPE, get_line_number(), "Tipos dos blocos 'se' e 'senao' são incompatíveis.");
+                            }
+                        }
                         $$ = asd_new("se");
                         asd_add_child($$, $3); 
                         if ($5 != NULL) asd_add_child($$, $5);
@@ -201,11 +218,17 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
                  ;
 
 unmatched_statement: TK_SE '(' expressao ')' comando {
+                        if ($3->data_type != TYPE_INTEGER) {
+                            semantic_error(ERR_WRONG_TYPE, get_line_number(), "Expressão de teste do 'se' deve ser do tipo 'inteiro'.");
+                        }
                         $$ = asd_new("se");
                         asd_add_child($$, $3); 
                         if ($5 != NULL) asd_add_child($$, $5);
                    }
                    | TK_SE '(' expressao ')' matched_statement TK_SENAO unmatched_statement {
+                        if ($3->data_type != TYPE_INTEGER) {
+                            semantic_error(ERR_WRONG_TYPE, get_line_number(), "Expressão de teste do 'se' deve ser do tipo 'inteiro'.");
+                        }
                         $$ = asd_new("se");
                         asd_add_child($$, $3);
                         if ($5 != NULL) asd_add_child($$, $5);
@@ -272,10 +295,9 @@ chamada_funcao: TK_ID '(' ')' {
                     // VERIFICAÇÃO 2.5: Se a função não esperava parâmetros, lança erro.
                     if (symbol->params == NULL || symbol->params->number_of_children == 0) {
                         semantic_error(ERR_EXCESS_ARGS, $1.numero_linha, $1.valor);
+                    } else {
+                        check_function_call_args(symbol, $3, $1.numero_linha);
                     }
-                    
-                    // Chama a função auxiliar para verificar número e tipo dos argumentos
-                    check_function_call_args(symbol, $3, $1.numero_linha);
                     
                     char label[256];
                     sprintf(label, "call %s", $1.valor);
@@ -295,12 +317,20 @@ retorno: TK_RETORNA expressao TK_ATRIB tipo_num {
             if ($4 != $2->data_type) {
                 semantic_error(ERR_WRONG_TYPE, get_line_number(), "Tipo de retorno incompatível com a expressão retornada.");
             }
+            if (current_function == NULL) {
+                semantic_error(ERR_WRONG_TYPE, get_line_number(), "Comando 'retorna' fora do escopo de uma função.");
+            } else if (current_function->type != $4) {
+                semantic_error(ERR_WRONG_TYPE, get_line_number(), "Tipo de retorno declarado ('retorna ... := tipo') incompatível com o tipo da função.");
+            }
             // A verificação do tipo do retorno com o da função deve ser feita no nó da função
             $$ = asd_new("retorna");
             asd_add_child($$, $2);
          };
 
 repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos {	
+                if ($3->data_type != TYPE_INTEGER) {
+                    semantic_error(ERR_WRONG_TYPE, get_line_number(), "Expressão de teste do 'enquanto' deve ser do tipo 'inteiro'.");
+                }
                 $$ = asd_new("enquanto");
                 asd_add_child($$, $3);
                 if ($5 != NULL) asd_add_child($$, $5);
