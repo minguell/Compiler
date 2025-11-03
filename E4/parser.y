@@ -307,7 +307,7 @@ chamada_funcao: TK_ID '(' ')' {
                 }
               ;
               
-argumentos: expressao                { $$ = $1; }
+argumentos: expressao                { $$ = asd_new("args"); asd_add_child($$, $1); }
           | expressao ',' argumentos { asd_add_child($1, $3); $$ = $1; }
           ;
 
@@ -400,41 +400,36 @@ fator: TK_ID {
 
 
 void check_function_call_args(symbol_t* func_symbol, asd_tree_t* args_node, int line) {
-    // Ponteiro para a lista de parâmetros da declaração da função
-    // O nó 'params' tem os parâmetros reais como filhos
+    // func_symbol->params é o nó "params" (da declaração)
+    // args_node é o nó "args" (da chamada)
     asd_tree_t* param_list = func_symbol->params;
-    int param_index = 0;
 
-    // Ponteiro para a lista de argumentos da chamada atual
-    asd_tree_t* current_arg = args_node;
+    // A lógica na regra 'chamada_funcao' já tratou os casos em que
+    // um é NULL e o outro não (ERR_MISSING_ARGS / ERR_EXCESS_ARGS).
+    // Esta função é chamada quando AMBOS existem.
     
-    // Percorre as duas listas simultaneamente
-    while (current_arg != NULL && param_list != NULL && param_index < param_list->number_of_children) {
-        asd_tree_t* current_param = param_list->children[param_index];
+    int num_params = param_list->number_of_children;
+    int num_args = args_node->number_of_children;
 
-        // 3. Verifica a compatibilidade de tipos
-        if (current_param->data_type != current_arg->data_type) {
-            semantic_error(ERR_WRONG_TYPE_ARGS, line, func_symbol->key);
-        }
-
-        // Avança para o próximo argumento e próximo parâmetro
-        if (current_arg->number_of_children > 0) {
-            current_arg = current_arg->children[0];
-        } else {
-            current_arg = NULL;
-        }
-        param_index++;
-    }
-
-    // 4. Verifica o número de argumentos vs. parâmetros
-    // Caso 1: Menos argumentos que o necessário
-    if (current_arg == NULL && param_index < param_list->number_of_children) {
+    // 1. Verifica contagem de argumentos
+    if (num_args < num_params) {
         semantic_error(ERR_MISSING_ARGS, line, func_symbol->key);
     }
-
-    // Caso 2: Mais argumentos que o necessário
-    if (current_arg != NULL && param_index >= param_list->number_of_children) {
+    if (num_args > num_params) {
         semantic_error(ERR_EXCESS_ARGS, line, func_symbol->key);
+    }
+
+    // 2. Verifica os tipos (agora que sabemos que a contagem é igual)
+    for (int i = 0; i < num_params; i++) {
+        asd_tree_t* current_param = param_list->children[i];
+        asd_tree_t* current_arg = args_node->children[i];
+
+        if (current_param->data_type != current_arg->data_type) {
+            // Reporta o erro especificando o argumento
+            char error_msg[256];
+            sprintf(error_msg, "Argumento %d na chamada da função '%s' está com tipo errado.", i+1, func_symbol->key);
+            semantic_error(ERR_WRONG_TYPE_ARGS, line, error_msg);
+        }
     }
 }
 
