@@ -332,6 +332,7 @@ repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos {
                     semantic_error(ERR_WRONG_TYPE, get_line_number(), "Expressão de teste do 'enquanto' deve ser do tipo 'inteiro'.");
                 }
                 $$ = asd_new("enquanto");
+                $$->data_type = $3->data_type;
                 asd_add_child($$, $3);
                 if ($5 != NULL) asd_add_child($$, $5);
            };
