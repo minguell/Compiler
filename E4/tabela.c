@@ -45,7 +45,7 @@ void free_all_scopes() {
 
 // --- Funções da Tabela de Símbolos ---
 
-void add_symbol(const char* key, int line, int nature, int type) {
+symbol_t* add_symbol(const char* key, int line, int nature, int type) {
     if (scope_stack == NULL) {
         fprintf(stderr, "Erro fatal: Tentando adicionar símbolo sem escopo.\n");
         exit(1);
@@ -67,10 +67,13 @@ void add_symbol(const char* key, int line, int nature, int type) {
     new_symbol->nature = nature;
     new_symbol->type = type;
     new_symbol->size = (type == TYPE_INTEGER) ? 4 : (type == TYPE_FLOAT) ? 8 : 0;
+    new_symbol->params = NULL; // Inicializa o novo campo como nulo
     
     // Adiciona no início da lista do escopo atual
     new_symbol->next = scope_stack->symbols;
     scope_stack->symbols = new_symbol;
+
+    return new_symbol; // Retorna o símbolo criado
 }
 
 symbol_t* find_symbol(const char* key) {
