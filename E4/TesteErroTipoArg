@@ -1,8 +1,0 @@
-soma -> inteiro com x := inteiro, y := inteiro := [
-    retorna x + y := inteiro;
-];
-
-main -> inteiro [] := [
-    var resultado := inteiro,
-    resultado := soma(10, 5.5); 
-];
