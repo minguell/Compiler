@@ -1,3 +1,6 @@
+/* Augusto Mattei Grohmnann - 550429
+ Miguel Dutra Fontes Guerra - 342573 */
+
 #define ERR_UNDECLARED       10 //2.2
 #define ERR_DECLARED         11 //2.2
 #define ERR_VARIABLE         20 //2.3

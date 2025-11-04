@@ -1,10 +1,11 @@
+/* Augusto Mattei Grohmnann - 550429
+ Miguel Dutra Fontes Guerra - 342573 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "tabela.h"
 #include "errors.h"
 
-// A pilha de escopos (o topo da pilha)
 scope_t *scope_stack = NULL;
 
 // --- Funções da Pilha de Escopos ---
@@ -26,7 +27,6 @@ void pop_scope() {
     scope_t* top = scope_stack;
     scope_stack = top->next;
 
-    // Liberar todos os símbolos no escopo que está sendo removido
     symbol_t* current_symbol = top->symbols;
     while (current_symbol != NULL) {
         symbol_t* next_symbol = current_symbol->next;
@@ -68,9 +68,8 @@ symbol_t* add_symbol(const char* key, int line, int nature, int type) {
     new_symbol->nature = nature;
     new_symbol->type = type;
     new_symbol->size = (type == TYPE_INTEGER) ? 4 : (type == TYPE_FLOAT) ? 8 : 0;
-    new_symbol->params = NULL; // Inicializa o novo campo como nulo
+    new_symbol->params = NULL; 
     
-    // Adiciona no início da lista do escopo atual
     new_symbol->next = scope_stack->symbols;
     scope_stack->symbols = new_symbol;
 
@@ -79,7 +78,6 @@ symbol_t* add_symbol(const char* key, int line, int nature, int type) {
 
 symbol_t* find_symbol(const char* key) {
     scope_t* current_scope = scope_stack;
-    // Procura em todos os escopos, do mais interno para o mais externo
     while (current_scope != NULL) {
         symbol_t* current_symbol = current_scope->symbols;
         while (current_symbol != NULL) {
@@ -90,7 +88,7 @@ symbol_t* find_symbol(const char* key) {
         }
         current_scope = current_scope->next;
     }
-    return NULL; // Não encontrado
+    return NULL; 
 }
 
 symbol_t* find_symbol_in_current_scope(const char* key) {
@@ -103,7 +101,7 @@ symbol_t* find_symbol_in_current_scope(const char* key) {
         }
         current_symbol = current_symbol->next;
     }
-    return NULL; // Não encontrado no escopo atual
+    return NULL; 
 }
 
 // --- Função de Erro ---
