@@ -35,10 +35,11 @@ do
         #    de teste para a entrada padrão (stdin) do executável.
         #    As saídas (stdout e stderr) serão impressas no terminal.
         "$EXECUTABLE" < "$test_file"
+        exit_code=$? 
         
         echo "-------------------------------------------------"
-        echo "FINALIZADO: $test_file (Código de saída: $?)"
-        echo ""
+        # Imprime o código de saída que foi salvo
+        echo "FINALIZADO: $test_file (Código de saída: $exit_code)"
     fi
 done
 
