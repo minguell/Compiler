@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "asd.h"
-#include "tabela.h" // Incluído para acesso à tabela de símbolos e tipos
-#include "errors.h"   // Incluído para os códigos de erro
+#include "tabela.h" 
+#include "errors.h"   
 
 int yylex(void);
 void yyerror (char const *mensagem);
@@ -24,12 +24,12 @@ static symbol_t* current_function = NULL;
 
 %code requires {
      #include "asd.h"
-     #include "tabela.h" // Adicionado para ter as definições de tipo no %union
+     #include "tabela.h"
      extern asd_tree_t *arvore;
-     // Estrutura do valor léxico vindo do scanner.l
+     // Estrutura do valor léxico do scanner.l
      typedef struct {
           int numero_linha;
-          int token_type; // Renomeado para evitar conflito com 'tipo' da gramática
+          int token_type;
           char* valor;
      } valor_lexico;
 }
@@ -61,7 +61,7 @@ static symbol_t* current_function = NULL;
 %union {
     valor_lexico valor_lexico;
     asd_tree_t* nodo_arvore;
-    int tipo_dado; // Adicionado para propagar tipos (TYPE_INTEGER, TYPE_FLOAT)
+    int tipo_dado; 
 }
 
 // Tipos dos não-terminais
@@ -72,9 +72,9 @@ static symbol_t* current_function = NULL;
 %type <nodo_arvore> expressao expr_logica_ou expr_logica_e expr_igualdade expr_relacional
 %type <nodo_arvore> expr_aditiva expr_multiplicativa expr_unaria fator literal argumentos
 
-// Não-terminais que não geram nós, mas passam informações (como tipo)
+// Não-terminais que não geram nós, mas passam informações 
 %type <tipo_dado> tipo_num
-%type <nodo_arvore> declaracao_variavel // Modificado para retornar um nó em caso de inicialização
+%type <nodo_arvore> declaracao_variavel 
 
 %%
 
@@ -95,18 +95,16 @@ lista:  elemento                { $$ = $1; }
                                 }
       ;
 
-elemento: declaracao_variavel   { $$ = $1; /* Agora pode retornar um nó (inicialização) */ }
+elemento: declaracao_variavel   { $$ = $1; }
         | declaracao_funcao     { $$ = $1; }
         ;
         
 declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
-                         // Ação Semântica: Adiciona variável à tabela de símbolos do escopo atual
                          add_symbol($2.valor, $2.numero_linha, NATURE_VARIABLE, $4);
                          free($2.valor);
                          $$ = NULL; // Declaração simples não gera nó na AST
                     }
                    | TK_VAR TK_ID TK_ATRIB tipo_num TK_COM literal {
-                         // Ação Semântica: Adiciona variável e verifica tipo da inicialização
                          add_symbol($2.valor, $2.numero_linha, NATURE_VARIABLE, $4);
                          
                          if ($4 != $6->data_type) {
@@ -144,9 +142,7 @@ cabecalho_funcao: TK_ID TK_SETA tipo_num
                       if($5 != NULL) {
                          asd_add_child($$, $5);
                          if(current_function)
-                         {
-                             // Armazena o nó "params" ($5), não apenas o primeiro filho.
-                             // Isto é necessário para a check_function_call_args.
+                         {    
                              current_function->params = $5; 
                          }
 
@@ -169,7 +165,7 @@ parametros: parametro                { $$ = asd_new("params"); asd_add_child($$,
           ;
 
 parametro: TK_ID TK_ATRIB tipo_num {
-               // Ação Semântica: Adiciona o parâmetro à tabela de símbolos do escopo atual
+               // Adiciona o parâmetro à tabela de símbolos do escopo atual
                add_symbol($1.valor, $1.numero_linha, NATURE_VARIABLE, $3);
                
                $$ = asd_new($1.valor);
@@ -206,7 +202,7 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
                         if ($5 == NULL) {
                             then_type = TYPE_INTEGER;
                         } else {
-                            // Regra: Tipo do bloco é o tipo do primeiro comando.
+                            // Tipo do bloco é o tipo do primeiro comando.
                             then_type = $5->data_type;
                         }
                         if ($7 == NULL) {
@@ -250,7 +246,7 @@ unmatched_statement: TK_SE '(' expressao ')' comando {
                    ;
 
 outro_comando: bloco_de_comandos { $$ = $1; }
-             | declaracao_variavel { $$ = $1; /* Passa o nó de inicialização, se houver */ }
+             | declaracao_variavel { $$ = $1; }
              | atribuicao { $$ = $1; }
              | chamada_funcao { $$ = $1; }
              | retorno { $$ = $1; }
@@ -262,7 +258,7 @@ literal: TK_LI_INTEIRO { $$ = asd_new($1.valor); $$->data_type = TYPE_INTEGER; a
        ;
 
 atribuicao: TK_ID TK_ATRIB expressao { 
-                // Ação Semântica: Verifica declaração e tipos da atribuição
+                // Verifica declaração e tipos da atribuição
                 symbol_t* symbol = find_symbol($1.valor);
                 if (symbol == NULL) {
                     semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
@@ -284,12 +280,12 @@ atribuicao: TK_ID TK_ATRIB expressao {
             };
 
 chamada_funcao: TK_ID '(' ')' {
-                    // Ação Semântica: Verifica a chamada de função sem argumentos
+                    // Verifica a chamada de função sem argumentos
                     symbol_t* symbol = find_symbol($1.valor);
                     if (symbol == NULL) semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
                     if (symbol->nature != NATURE_FUNCTION) semantic_error(ERR_VARIABLE, $1.numero_linha, $1.valor);
                     
-                    // VERIFICAÇÃO 2.5: Se a função esperava parâmetros, lança erro.
+                    // Se a função esperava parâmetros, lança erro.
                     if (symbol->params != NULL && symbol->params->number_of_children > 0) {
                         semantic_error(ERR_MISSING_ARGS, $1.numero_linha, $1.valor);
                     }
@@ -301,12 +297,10 @@ chamada_funcao: TK_ID '(' ')' {
                     free($1.valor);
                 }
               | TK_ID '(' argumentos ')' {
-                    // Ação Semântica: Verifica a chamada de função com argumentos
                     symbol_t* symbol = find_symbol($1.valor);
                     if (symbol == NULL) semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
                     if (symbol->nature != NATURE_FUNCTION) semantic_error(ERR_VARIABLE, $1.numero_linha, $1.valor);
                     
-                    // VERIFICAÇÃO 2.5: Se a função não esperava parâmetros, lança erro.
                     if (symbol->params == NULL || symbol->params->number_of_children == 0) {
                         semantic_error(ERR_EXCESS_ARGS, $1.numero_linha, $1.valor);
                     } else {
@@ -327,7 +321,7 @@ argumentos: expressao                { $$ = asd_new("args"); asd_add_child($$, $
           ;
 
 retorno: TK_RETORNA expressao TK_ATRIB tipo_num { 
-            // Ação Semântica: Verificar se o tipo do retorno é compatível com o tipo da expressão
+            // Verifica se o tipo do retorno é compatível com o tipo da expressão
             if ($4 != $2->data_type) {
                 semantic_error(ERR_WRONG_TYPE, get_line_number(), "Tipo de retorno incompatível com a expressão retornada.");
             }
@@ -336,7 +330,6 @@ retorno: TK_RETORNA expressao TK_ATRIB tipo_num {
             } else if (current_function->type != $4) {
                 semantic_error(ERR_WRONG_TYPE, get_line_number(), "Tipo de retorno declarado ('retorna ... := tipo') incompatível com o tipo da função.");
             }
-            // A verificação do tipo do retorno com o da função deve ser feita no nó da função
             $$ = asd_new("retorna");
             $$->data_type = $2->data_type;
             asd_add_child($$, $2);
@@ -396,7 +389,7 @@ expr_unaria: '+' fator { $$ = asd_new_unary_op("+", $2); $$->data_type = $2->dat
            ;
 
 fator: TK_ID {
-           // Ação Semântica: Busca o identificador e anota seu tipo no nó
+           //  Busca o identificador e anota seu tipo no nó
            symbol_t* symbol = find_symbol($1.valor);
            if (symbol == NULL) {
                semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
@@ -416,18 +409,11 @@ fator: TK_ID {
 
 
 void check_function_call_args(symbol_t* func_symbol, asd_tree_t* args_node, int line) {
-    // func_symbol->params é o nó "params" (da declaração)
-    // args_node é o nó "args" (da chamada)
-    asd_tree_t* param_list = func_symbol->params;
-
-    // A lógica na regra 'chamada_funcao' já tratou os casos em que
-    // um é NULL e o outro não (ERR_MISSING_ARGS / ERR_EXCESS_ARGS).
-    // Esta função é chamada quando AMBOS existem.
-    
+    asd_tree_t* param_list = func_symbol->params;    
     int num_params = param_list->number_of_children;
     int num_args = args_node->number_of_children;
 
-    // 1. Verifica contagem de argumentos
+    // Verifica contagem de argumentos
     if (num_args < num_params) {
         semantic_error(ERR_MISSING_ARGS, line, func_symbol->key);
     }
@@ -435,13 +421,13 @@ void check_function_call_args(symbol_t* func_symbol, asd_tree_t* args_node, int 
         semantic_error(ERR_EXCESS_ARGS, line, func_symbol->key);
     }
 
-    // 2. Verifica os tipos (agora que sabemos que a contagem é igual)
+    // Verifica os tipos 
     for (int i = 0; i < num_params; i++) {
         asd_tree_t* current_param = param_list->children[i];
         asd_tree_t* current_arg = args_node->children[i];
 
         if (current_param->data_type != current_arg->data_type) {
-            // Reporta o erro especificando o argumento
+            // Reporta erro especificando o argumento
             char error_msg[256];
             sprintf(error_msg, "Argumento %d na chamada da função '%s' está com tipo errado.", i+1, func_symbol->key);
             semantic_error(ERR_WRONG_TYPE_ARGS, line, error_msg);
@@ -470,14 +456,12 @@ static asd_tree_t* asd_new_unary_op(const char* label, asd_tree_t* child) {
 // Implementação da verificação de tipos para expressões binárias
 void check_types(asd_tree_t* node, asd_tree_t* child1, asd_tree_t* child2) {
     if (child1->data_type == TYPE_UNDEFINED || child2->data_type == TYPE_UNDEFINED) {
-        // Um dos filhos não tem tipo, erro já deve ter sido reportado (ex: undeclared)
         node->data_type = TYPE_UNDEFINED;
         return;
     }
-    // Regra: float e int não podem ser misturados
+    // float e int não podem ser misturados
     if (child1->data_type != child2->data_type) {
         semantic_error(ERR_WRONG_TYPE, get_line_number(), "Operação com tipos incompatíveis (int e float).");
     }
-    // O tipo do nó pai é o mesmo dos filhos
     node->data_type = child1->data_type;
 }
