@@ -1,9 +1,0 @@
-area -> decimal com base := decimal, altura := decimal := [
-    retorna base * altura := decimal;
-];
-
-main -> inteiro [] := [
-    var a := decimal,
-    a := area(5.0, 2.5); 
-    retorna 0 := inteiro;
-];
