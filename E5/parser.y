@@ -253,7 +253,27 @@ outro_comando: bloco_de_comandos { $$ = $1; }
              | repeticao { $$ = $1; }
              ;
 
-literal: TK_LI_INTEIRO { $$ = asd_new($1.valor); $$->data_type = TYPE_INTEGER; add_symbol($1.valor, $1.numero_linha, NATURE_LITERAL, TYPE_INTEGER); free($1.valor); }
+literal: TK_LI_INTEIRO { 
+    // Cria o nó da árvore (código existente)
+    $$ = asd_new($1.valor); 
+    $$->data_type = TYPE_INTEGER; 
+    add_symbol($1.valor, $1.numero_linha, NATURE_LITERAL, TYPE_INTEGER); 
+    
+    // --- GERAÇÃO DE CÓDIGO ---
+    // 1. Gera um novo temporário para guardar esse valor (ex: r0)
+    $$->temp_result = new_temp();
+    
+    // 2. Cria a instrução ILOC: loadI VALOR => r0
+    ILOC_Operand* op_const = new_operand(ILOC_OP_CONST, $1.valor);
+    ILOC_Operand* op_dest = new_operand(ILOC_OP_REG, $$->temp_result);
+    ILOC_Op* op = new_operation("loadI", op_const, op_dest, NULL);
+    
+    // 3. Cria a lista de código e anexa ao nó
+    $$->code = new_iloc_list(new_iloc_node(op));
+    
+    free($1.valor); 
+}
+	
 	   | TK_LI_DECIMAL { $$ = asd_new($1.valor); $$->data_type = TYPE_FLOAT; add_symbol($1.valor, $1.numero_linha, NATURE_LITERAL, TYPE_FLOAT); free($1.valor); } 
        ;
 
@@ -371,7 +391,29 @@ expr_relacional: expr_relacional '<' expr_aditiva      { $$ = asd_new_binary_op(
                | expr_aditiva                          { $$ = $1;}
                ;
 
-expr_aditiva: expr_aditiva '+' expr_multiplicativa { $$ = asd_new_binary_op("+", $1, $3); check_types($$, $1, $3); }
+expr_aditiva: expr_aditiva '+' expr_multiplicativa { 
+    // Cria o nó da árvore e verifica tipos (código existente)
+    $$ = asd_new_binary_op("+", $1, $3); 
+    check_types($$, $1, $3);
+    
+    // --- GERAÇÃO DE CÓDIGO ---
+    // 1. O temporário de destino desta soma
+    $$->temp_result = new_temp();
+
+    // 2. Cria a instrução: add TempEsq, TempDir => TempNovo
+    ILOC_Operand* src1 = new_operand(ILOC_OP_REG, $1->temp_result);
+    ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
+    ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+    ILOC_Op* op_add = new_operation("add", src1, src2, dest);
+
+    // 3. Concatena listas: CodigoEsq + CodigoDir + InstrucaoSoma
+    $$->code = $1->code; // Começa com o código da esquerda
+    concat_iloc_lists($$->code, $3->code); // Adiciona o código da direita
+    
+    // Adiciona a instrução 'add' ao final
+    ILOC_List* list_op = new_iloc_list(new_iloc_node(op_add));
+    concat_iloc_lists($$->code, list_op);
+}
             | expr_aditiva '-' expr_multiplicativa { $$ = asd_new_binary_op("-", $1, $3); check_types($$, $1, $3); }
             | expr_multiplicativa                  { $$ = $1; }
             ;
