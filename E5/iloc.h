@@ -44,6 +44,9 @@ ILOC_Op* new_operation(char* opcode, ILOC_Operand* arg1, ILOC_Operand* arg2, ILO
 ILOC_List* new_iloc_list(ILOC_Node* node);
 void free_iloc_list(ILOC_List* list);
 
+ILOC_Node* new_iloc_node(ILOC_Op* op);
+void concat_iloc_lists(ILOC_List* list1, ILOC_List* list2);
+
 // Gera um novo nome de rótulo único (ex: "L1")
 char *new_label();
 
