@@ -414,12 +414,67 @@ expr_aditiva: expr_aditiva '+' expr_multiplicativa {
     ILOC_List* list_op = new_iloc_list(new_iloc_node(op_add));
     concat_iloc_lists($$->code, list_op);
 }
-            | expr_aditiva '-' expr_multiplicativa { $$ = asd_new_binary_op("-", $1, $3); check_types($$, $1, $3); }
+	| expr_aditiva '-' expr_multiplicativa { 
+                $$ = asd_new_binary_op("-", $1, $3); 
+                check_types($$, $1, $3);
+
+                // --- GERAÇÃO DE CÓDIGO (SUB) ---
+                $$->temp_result = new_temp(); // 1. Novo registrador para o resultado
+
+                // 2. Cria instrução: sub rEsq, rDir => rNovo
+                ILOC_Operand* src1 = new_operand(ILOC_OP_REG, $1->temp_result);
+                ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
+                ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+                
+                // Note o opcode "sub"
+                ILOC_Op* op = new_operation("sub", src1, src2, dest);
+
+                // 3. Concatena: CodigoEsq + CodigoDir + InstrucaoSub
+                $$->code = $1->code;
+                concat_iloc_lists($$->code, $3->code);
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));
+            }
             | expr_multiplicativa                  { $$ = $1; }
             ;
 
-expr_multiplicativa: expr_multiplicativa '*' expr_unaria { $$ = asd_new_binary_op("*", $1, $3); check_types($$, $1, $3); }
-                   | expr_multiplicativa '/' expr_unaria { $$ = asd_new_binary_op("/", $1, $3); check_types($$, $1, $3); }
+expr_multiplicativa: expr_multiplicativa '*' expr_unaria { 
+                $$ = asd_new_binary_op("*", $1, $3); 
+                check_types($$, $1, $3);
+
+                // --- GERAÇÃO DE CÓDIGO (MULT) ---
+                $$->temp_result = new_temp();
+
+                // Cria instrução: mult rEsq, rDir => rNovo
+                ILOC_Operand* src1 = new_operand(ILOC_OP_REG, $1->temp_result);
+                ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
+                ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+                
+                // Note o opcode "mult"
+                ILOC_Op* op = new_operation("mult", src1, src2, dest);
+
+                $$->code = $1->code;
+                concat_iloc_lists($$->code, $3->code);
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));
+            }
+                   | expr_multiplicativa '/' expr_unaria { 
+                $$ = asd_new_binary_op("/", $1, $3); 
+                check_types($$, $1, $3);
+
+                // --- GERAÇÃO DE CÓDIGO (DIV) ---
+                $$->temp_result = new_temp();
+
+                // Cria instrução: div rEsq, rDir => rNovo
+                ILOC_Operand* src1 = new_operand(ILOC_OP_REG, $1->temp_result);
+                ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
+                ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+                
+                // Note o opcode "div"
+                ILOC_Op* op = new_operation("div", src1, src2, dest);
+
+                $$->code = $1->code;
+                concat_iloc_lists($$->code, $3->code);
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));
+            }
                    | expr_multiplicativa '%' expr_unaria { $$ = asd_new_binary_op("%", $1, $3); check_types($$, $1, $3); }
                    | expr_unaria                         { $$ = $1; }
                    ;
