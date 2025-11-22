@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "asd.h"
 
-asd_tree_t *asd_new(const char *label)
+asd_tree_t *asd_new(const char *label)  
 {
   asd_tree_t *ret = NULL;
   ret = calloc(1, sizeof(asd_tree_t));
@@ -15,6 +15,8 @@ asd_tree_t *asd_new(const char *label)
     ret->data_type = 0;
     ret->number_of_children = 0;
     ret->children = NULL;
+    ret->code = NULL;
+    ret->temp_result = NULL;
   }
   return ret;
 }
@@ -26,6 +28,12 @@ void asd_free(asd_tree_t *tree)
     for (i = 0; i < tree->number_of_children; i++){
       asd_free(tree->children[i]);
     }
+    if (tree->code != NULL) {
+        free_iloc_list(tree->code); 
+    }
+    if (tree->temp_result != NULL) {
+        free(tree->temp_result);
+    } 
     free(tree->children);
     free(tree->label);
     free(tree);

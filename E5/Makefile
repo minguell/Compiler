@@ -1,7 +1,7 @@
 # Augusto Mattei Grohmnann - 550429
 # Miguel Dutra Fontes Guerra - 342573 
 
-EXEC = etapa4
+EXEC = etapa5
 CC = gcc
 
 CFLAGS = -Wall -g -fsanitize=address
@@ -17,6 +17,7 @@ YACC_SRC = parser.y
 MAIN_SRC = main.c
 ASD_SRC = asd.c
 TABELA_SRC = tabela.c
+ILOC_SRC = iloc.c
 
 # Arquivos Gerados
 LEX_OUT = lex.yy.c
@@ -24,7 +25,7 @@ YACC_OUT_C = parser.tab.c
 YACC_OUT_H = parser.tab.h
 
 # Arquivos Objeto
-OBJS = main.o lex.yy.o parser.tab.o asd.o tabela.o
+OBJS = main.o lex.yy.o parser.tab.o asd.o tabela.o iloc.o
 
 all: $(EXEC)
 
@@ -45,6 +46,9 @@ asd.o: $(ASD_SRC) asd.h
 
 tabela.o: $(TABELA_SRC) tabela.h asd.h errors.h
 	$(CC) $(CFLAGS) -c $(TABELA_SRC)
+	
+iloc.o: $(ILOC_SRC) iloc.h
+	$(CC) $(CFLAGS) -c $(ILOC_SRC)	
 
 $(LEX_OUT): $(LEX_SRC)
 	$(LEX) -o $(LEX_OUT) $(LEX_SRC)

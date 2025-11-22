@@ -1,6 +1,7 @@
 /* Augusto Mattei Grohmnann - 550429
  Miguel Dutra Fontes Guerra - 342573 */
  
+#include "iloc.h" // Inclua o novo cabeçalho
 #ifndef _ASD_H_
 #define _ASD_H_
 
@@ -9,6 +10,11 @@ typedef struct asd_tree {
   int data_type;
   int number_of_children;
   struct asd_tree **children;
+  
+  // --- NOVOS CAMPOS PARA E5 ---
+  ILOC_List *code;   // Lista de código gerado por este nó 
+  char *temp_result; // Nome do registrador que guarda o resultado deste nó (ex: "r5")
+                     // Isso facilitará quando o nó pai precisar usar o valor do filho.
 } asd_tree_t;
 
 /*
