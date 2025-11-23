@@ -205,7 +205,6 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
                         if ($5 == NULL) {
                             then_type = TYPE_INTEGER;
                         } else {
-                            // Tipo do bloco é o tipo do primeiro comando.
                             then_type = $5->data_type;
                         }
                         if ($7 == NULL) {
@@ -223,6 +222,43 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
                         asd_add_child($$, $3); 
                         if ($5 != NULL) asd_add_child($$, $5);
                         if ($7 != NULL) asd_add_child($$, $7);
+                        char* true_label = new_label();
+                        char* false_label = new_label();
+                        char* end_label = new_label();
+
+                        ILOC_Operand* op_cond = new_operand(ILOC_OP_REG, $3->temp_result);
+                        ILOC_Operand* op_lbl_true = new_operand(ILOC_OP_LABEL, true_label);
+                        ILOC_Operand* op_lbl_false = new_operand(ILOC_OP_LABEL, false_label);
+                        ILOC_Operand* op_lbl_end = new_operand(ILOC_OP_LABEL, end_label);
+
+                        // 1. Código da Condição + CBR
+                        $$->code = $3->code;
+                        $3->code = NULL;
+                        // cbr r_cond -> L_true, L_false
+                        ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_false);
+                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr)));
+
+                        // 2. Rótulo True + Bloco True + JumpI para o fim
+                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label)));
+                        if ($5 != NULL) {
+                            concat_iloc_lists($$->code, $5->code);
+                            $5->code = NULL;
+                        }
+                        // jumpI -> L_end (pula o else)
+                        ILOC_Op* op_jump = new_operation("jumpI", op_lbl_end, NULL, NULL);
+                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_jump)));
+
+                        // 3. Rótulo False + Bloco Else
+                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(false_label)));
+                        if ($7 != NULL) {
+                            concat_iloc_lists($$->code, $7->code);
+                            $7->code = NULL;
+                        }
+
+                        // 4. Rótulo Fim
+                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label)));
+
+                        free(true_label); free(false_label); free(end_label);
                    }
                  | outro_comando { $$ = $1; }
                  ;
@@ -235,6 +271,31 @@ unmatched_statement: TK_SE '(' expressao ')' comando {
                         $$->data_type = $3->data_type;
                         asd_add_child($$, $3); 
                         if ($5 != NULL) asd_add_child($$, $5);
+
+                        char* true_label = new_label();
+                        char* end_label = new_label();
+
+                        ILOC_Operand* op_cond = new_operand(ILOC_OP_REG, $3->temp_result);
+                        ILOC_Operand* op_lbl_true = new_operand(ILOC_OP_LABEL, true_label);
+                        ILOC_Operand* op_lbl_end = new_operand(ILOC_OP_LABEL, end_label);
+
+                        // 1. Código Condição + CBR -> True, End
+                        $$->code = $3->code;
+                        $3->code = NULL;
+                        ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_end);
+                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr)));
+
+                        // 2. Rótulo True + Bloco
+                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label)));
+                        if ($5 != NULL) {
+                            concat_iloc_lists($$->code, $5->code);
+                            $5->code = NULL;
+                        }
+
+                        // 3. Rótulo Fim
+                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label)));
+                        
+                        free(true_label); free(end_label);
                    }
                    | TK_SE '(' expressao ')' matched_statement TK_SENAO unmatched_statement {
                         if ($3->data_type != TYPE_INTEGER) {
@@ -245,35 +306,42 @@ unmatched_statement: TK_SE '(' expressao ')' comando {
                         asd_add_child($$, $3);
                         if ($5 != NULL) asd_add_child($$, $5);
                         if ($7 != NULL) asd_add_child($$, $7);
-                        // 1. Gera nomes para os rótulos
-    char* true_label = new_label(); // Ex: L1
-    char* end_label = new_label();  // Ex: L2
+                        char* true_label = new_label();
+                        char* false_label = new_label(); // Faltava este rótulo
+                        char* end_label = new_label();
 
+                        ILOC_Operand* op_cond = new_operand(ILOC_OP_REG, $3->temp_result);
+                        ILOC_Operand* op_lbl_true = new_operand(ILOC_OP_LABEL, true_label);
+                        ILOC_Operand* op_lbl_false = new_operand(ILOC_OP_LABEL, false_label);
+                        ILOC_Operand* op_lbl_end = new_operand(ILOC_OP_LABEL, end_label);
 
-    ILOC_Operand* op_cond = new_operand(ILOC_OP_REG, $3->temp_result);
-    ILOC_Operand* op_lbl_true = new_operand(ILOC_OP_LABEL, true_label);
-    ILOC_Operand* op_lbl_end = new_operand(ILOC_OP_LABEL, end_label);
-    
-    ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_end);
+                        // 1. Código Condição + CBR -> True, False
+                        $$->code = $3->code;
+                        $3->code = NULL;
+                        ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_false);
+                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr)));
 
-    // 3. Montagem da lista final
-    $$->code = $3->code;            // 1. Código da Condição
-    $3->code = NULL;                // (Evita double free)
+                        // 2. Rótulo True + Bloco True + JumpI End
+                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label)));
+                        if ($5 != NULL) {
+                            concat_iloc_lists($$->code, $5->code);
+                            $5->code = NULL;
+                        }
+                        // Faltava este Jump para pular o else
+                        ILOC_Op* op_jump = new_operation("jumpI", op_lbl_end, NULL, NULL); 
+                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_jump)));
 
-    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr))); // 2. Instrução CBR
+                        // 3. Rótulo False + Bloco Else
+                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(false_label)));
+                        if ($7 != NULL) {
+                            concat_iloc_lists($$->code, $7->code);
+                            $7->code = NULL;
+                        }
 
-    concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label))); // 3. Rótulo True
-    
-    if ($5 != NULL) {
-        concat_iloc_lists($$->code, $5->code); // 4. Código do Bloco True
-        $5->code = NULL;            // (Evita double free)
-    }
+                        // 4. Rótulo Fim
+                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label)));
 
-    concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label))); // 5. Rótulo Fim
-
-    // Limpeza de strings auxiliares (strdup foi usado dentro das funções de create, então podemos liberar estas)
-    free(true_label);
-    free(end_label);
+                        free(true_label); free(false_label); free(end_label);
                    }
                    ;
 
@@ -417,6 +485,40 @@ repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos {
                 $$->data_type = $3->data_type;
                 asd_add_child($$, $3);
                 if ($5 != NULL) asd_add_child($$, $5);
+                char* start_label = new_label(); // Começo do loop (antes da condição)
+                char* true_label = new_label();  // Corpo do loop
+                char* end_label = new_label();   // Saída
+
+                ILOC_Operand* op_cond = new_operand(ILOC_OP_REG, $3->temp_result);
+                ILOC_Operand* op_lbl_start = new_operand(ILOC_OP_LABEL, start_label);
+                ILOC_Operand* op_lbl_true = new_operand(ILOC_OP_LABEL, true_label);
+                ILOC_Operand* op_lbl_end = new_operand(ILOC_OP_LABEL, end_label);
+
+                // 1. Rótulo de Início (para onde o loop volta)
+                $$->code = new_iloc_list(new_label_node(start_label));
+
+                // 2. Código da Condição + CBR -> True, End
+                concat_iloc_lists($$->code, $3->code);
+                $3->code = NULL;
+
+                ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_end);
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr)));
+
+                // 3. Rótulo True + Corpo do Loop
+                concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label)));
+                if ($5 != NULL) {
+                    concat_iloc_lists($$->code, $5->code);
+                    $5->code = NULL;
+                }
+
+                // 4. Jump incondicional de volta ao Início
+                ILOC_Op* op_jump = new_operation("jumpI", op_lbl_start, NULL, NULL);
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_jump)));
+
+                // 5. Rótulo Fim (saída do loop)
+                concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label)));
+
+                free(start_label); free(true_label); free(end_label);
            };
 
 tipo_num: TK_DECIMAL { $$ = TYPE_FLOAT; }
