@@ -73,12 +73,13 @@ symbol_t* add_symbol(const char* key, int line, int nature, int type) {
     new_symbol->type = type;
     new_symbol->size = (type == TYPE_INTEGER) ? 4 : (type == TYPE_FLOAT) ? 8 : 0;
 if (scope_stack->next == NULL) {
+        new_symbol->is_global = 1;
         new_symbol->address = global_offset;
         if (nature == NATURE_VARIABLE) {
             global_offset += new_symbol->size;
         }
     } else {
-        // Escopo Local (Função)
+        new_symbol->is_global = 0;
         new_symbol->address = local_offset;
         if (nature == NATURE_VARIABLE) {
             local_offset += new_symbol->size;

@@ -24,6 +24,7 @@ typedef struct symbol {
     int type;
     int size; 
     int address;
+    int is_global;
     asd_tree_t* params; // Ponteiro para o nó com a lista de parâmetros
     struct symbol* next;
 } symbol_t;

@@ -390,35 +390,32 @@ atribuicao: TK_ID TK_ATRIB expressao {
                     semantic_error(ERR_WRONG_TYPE, $1.numero_linha, "Tipo da expressão incompatível com a variável.");
                 }
 
-$$ = asd_new(":=");
-        $$->data_type = symbol->type;
-        asd_tree_t* id_node = asd_new($1.valor); // Recriando nó ID para visualização
-        id_node->data_type = symbol->type;
-        asd_add_child($$, id_node);
-        asd_add_child($$, $3);
+                $$ = asd_new(":=");
+                $$->data_type = symbol->type;
+                asd_tree_t* id_node = asd_new($1.valor); // Recriando nó ID para visualização
+                id_node->data_type = symbol->type;
+                asd_add_child($$, id_node);
+                asd_add_child($$, $3);
 
-        // --- GERAÇÃO DE CÓDIGO ---
-        // 1. Herda o código da expressão
-        $$->code = $3->code;
-        $3->code = NULL; // <--- CORREÇÃO CRÍTICA: O pai assume o código, o filho não deve mais apontar para ele.
+                // --- GERAÇÃO DE CÓDIGO ---
+                // 1. Herda o código da expressão
+                $$->code = $3->code;
+                $3->code = NULL; // <--- CORREÇÃO CRÍTICA: O pai assume o código, o filho não deve mais apontar para ele.
 
-        // 2. Gera o store
-        ILOC_Operand* op_src = new_operand(ILOC_OP_REG, $3->temp_result);
-        
-        char* base_reg = "rfp";
-        // Lógica de rbss se necessário...
-        ILOC_Operand* op_base = new_operand(ILOC_OP_REG, base_reg);
-        
-        char str_offset[16];
-        sprintf(str_offset, "%d", symbol->address); 
-        ILOC_Operand* op_offset = new_operand(ILOC_OP_CONST, str_offset);
+                // 2. Gera o store
+                char* base_reg = (symbol->is_global) ? "rbss" : "rfp";
+                ILOC_Operand* op_base = new_operand(ILOC_OP_REG, base_reg);
+                
+                char str_offset[16];
+                sprintf(str_offset, "%d", symbol->address); 
+                ILOC_Operand* op_offset = new_operand(ILOC_OP_CONST, str_offset);
 
-        ILOC_Op* op_store = new_operation("storeAI", op_src, op_base, op_offset);
-        
-        // Anexa ao final
-        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_store)));
-        
-        free($1.valor);
+                ILOC_Op* op_store = new_operation("storeAI", op_src, op_base, op_offset);
+                
+                // Anexa ao final
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_store)));
+                
+                free($1.valor);
             };
 
 chamada_funcao: TK_ID '(' ')' {
@@ -644,50 +641,43 @@ expr_unaria: '+' fator { $$ = asd_new_unary_op("+", $2); $$->data_type = $2->dat
 
 fator: TK_ID {
            //  Busca o identificador e anota seu tipo no nó
-           symbol_t* symbol = find_symbol($1.valor);
-           if (symbol == NULL) {
-               semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
-           }
-           if (symbol->nature != NATURE_VARIABLE) {
+            symbol_t* symbol = find_symbol($1.valor);
+            if (symbol == NULL) {
+                semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
+            }
+            if (symbol->nature != NATURE_VARIABLE) {
                semantic_error(ERR_FUNCTION, $1.numero_linha, $1.valor);
-           }
-           $$ = asd_new($1.valor);
-    $$->data_type = symbol->type;
-    
-    // --- GERAÇÃO DE CÓDIGO (Load Variable) ---
-    $$->temp_result = new_temp(); // Registrador onde o valor vai ficar
-    
-    // Define a base dependendo se é global ou local
-    // (Simplificação: assumindo local=rfp por enquanto. No futuro verificar escopo)
-char* base_reg;
-base_reg = "rfp";
-    if (symbol->nature == NATURE_VARIABLE /* && verificar se é global */) {
-        // base_reg = "rbss"; // Se fosse global
-    }
+            }
+            $$ = asd_new($1.valor);
+            $$->data_type = symbol->type;
+            
+            // --- GERAÇÃO DE CÓDIGO (Load Variable) ---
+            $$->temp_result = new_temp(); // Registrador onde o valor vai ficar
+            
+            char* base_reg = (symbol->is_global) ? "rbss" : "rfp";
 
-    // Cria operando de origem: rfp (ou rbss)
-    ILOC_Operand* op_base = new_operand(ILOC_OP_REG, base_reg);
-    
-    // Cria operando de offset (Endereço da variável). 
-    // OBS: Você precisará calcular esse endereço na declaração. Vamos por '0' ou '4' de teste.
-    char str_offset[16];
-    sprintf(str_offset, "%d", symbol->address);
-    ILOC_Operand* op_offset = new_operand(ILOC_OP_CONST, str_offset);
-    
-    // Cria operando de destino
-    ILOC_Operand* op_dest = new_operand(ILOC_OP_REG, $$->temp_result);
+            // Cria operando de origem: rfp (ou rbss)
+            ILOC_Operand* op_base = new_operand(ILOC_OP_REG, base_reg);
+            
+            // Cria operando de offset (Endereço da variável). 
+            char str_offset[16];
+            sprintf(str_offset, "%d", symbol->address);
+            ILOC_Operand* op_offset = new_operand(ILOC_OP_CONST, str_offset);
+            
+            // Cria operando de destino
+            ILOC_Operand* op_dest = new_operand(ILOC_OP_REG, $$->temp_result);
 
-    // Instrução: loadAI base, offset => temp
-    ILOC_Op* op_load = new_operation("loadAI", op_base, op_offset, op_dest);
-    
-    $$->code = new_iloc_list(new_iloc_node(op_load));
-    
-    free($1.valor);
-       }
-     | literal        { $$ = $1; }
-     | chamada_funcao { $$ = $1; }
-     | '(' expressao ')' { $$ = $2; }
-     ;
+            // Instrução: loadAI base, offset => temp
+            ILOC_Op* op_load = new_operation("loadAI", op_base, op_offset, op_dest);
+            
+            $$->code = new_iloc_list(new_iloc_node(op_load));
+            
+            free($1.valor);
+            }
+            | literal        { $$ = $1; }
+            | chamada_funcao { $$ = $1; }
+            | '(' expressao ')' { $$ = $2; }
+            ;
 %%
 
 
