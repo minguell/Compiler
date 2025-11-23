@@ -8,6 +8,10 @@
 
 scope_t *scope_stack = NULL;
 
+// Contadores de deslocamento
+static int global_offset = 0; // Deslocamento para globais (rbss)
+static int local_offset = 0;  // Deslocamento para locais (rfp)
+
 // --- Funções da Pilha de Escopos ---
 
 void push_scope() {
@@ -68,14 +72,28 @@ symbol_t* add_symbol(const char* key, int line, int nature, int type) {
     new_symbol->nature = nature;
     new_symbol->type = type;
     new_symbol->size = (type == TYPE_INTEGER) ? 4 : (type == TYPE_FLOAT) ? 8 : 0;
+if (scope_stack->next == NULL) {
+        new_symbol->address = global_offset;
+        if (nature == NATURE_VARIABLE) {
+            global_offset += new_symbol->size;
+        }
+    } else {
+        // Escopo Local (Função)
+        new_symbol->address = local_offset;
+        if (nature == NATURE_VARIABLE) {
+            local_offset += new_symbol->size;
+        }
+    }
     new_symbol->params = NULL; 
-    
     new_symbol->next = scope_stack->symbols;
     scope_stack->symbols = new_symbol;
 
     return new_symbol; // Retorna o símbolo criado
 }
-
+// IMPORTANTE: Quando saímos de uma função, devemos resetar o local_offset?
+// Geralmente sim, para a próxima função começar do zero.
+// Adicione isso na pop_scope se desejar reutilizar espaço, ou deixe crescer se não houver múltiplas funções.
+// Como o enunciado diz "apenas uma função"[cite: 256], não é crítico resetar.
 symbol_t* find_symbol(const char* key) {
     scope_t* current_scope = scope_stack;
     while (current_scope != NULL) {

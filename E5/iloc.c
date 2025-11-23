@@ -124,3 +124,11 @@ void free_iloc_list(ILOC_List* list) {
     // Libera a estrutura da lista
     free(list);
 }
+
+// Cria um nó contendo uma instrução NOP com um rótulo associado
+ILOC_Node* new_label_node(char* label) {
+    ILOC_Op* op = new_operation("nop", NULL, NULL, NULL);
+    ILOC_Node* node = new_iloc_node(op);
+    node->label = strdup(label); // Define o rótulo do nó
+    return node;
+}

@@ -42,6 +42,7 @@ typedef struct {
 ILOC_Operand* new_operand(OperandType type, char* value);
 ILOC_Op* new_operation(char* opcode, ILOC_Operand* arg1, ILOC_Operand* arg2, ILOC_Operand* arg3);
 ILOC_List* new_iloc_list(ILOC_Node* node);
+ILOC_Node* new_label_node(char* label);
 void free_iloc_list(ILOC_List* list);
 
 ILOC_Node* new_iloc_node(ILOC_Op* op);

@@ -121,13 +121,16 @@ declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
                    };
 
 declaracao_funcao: cabecalho_funcao bloco_de_comandos {
-                        $$ = $1;
-                        if ($2 != NULL){
-                              asd_add_child($$, $2);
-                        }
-                        pop_scope();
-                        current_function = NULL;
-                   };
+        $$ = $1;
+        if ($2 != NULL) {
+           asd_add_child($$, $2); // <--- CORREÇÃO 1: Adiciona o corpo como filho
+           
+           $$->code = $2->code;
+           $2->code = NULL;       // <--- CORREÇÃO 2: Transfere a posse do código para evitar Double Free
+        }
+        pop_scope();
+        current_function = NULL;
+   };
 
 cabecalho_funcao: TK_ID TK_SETA tipo_num 
                   {
@@ -242,6 +245,35 @@ unmatched_statement: TK_SE '(' expressao ')' comando {
                         asd_add_child($$, $3);
                         if ($5 != NULL) asd_add_child($$, $5);
                         if ($7 != NULL) asd_add_child($$, $7);
+                        // 1. Gera nomes para os rótulos
+    char* true_label = new_label(); // Ex: L1
+    char* end_label = new_label();  // Ex: L2
+
+
+    ILOC_Operand* op_cond = new_operand(ILOC_OP_REG, $3->temp_result);
+    ILOC_Operand* op_lbl_true = new_operand(ILOC_OP_LABEL, true_label);
+    ILOC_Operand* op_lbl_end = new_operand(ILOC_OP_LABEL, end_label);
+    
+    ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_end);
+
+    // 3. Montagem da lista final
+    $$->code = $3->code;            // 1. Código da Condição
+    $3->code = NULL;                // (Evita double free)
+
+    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr))); // 2. Instrução CBR
+
+    concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label))); // 3. Rótulo True
+    
+    if ($5 != NULL) {
+        concat_iloc_lists($$->code, $5->code); // 4. Código do Bloco True
+        $5->code = NULL;            // (Evita double free)
+    }
+
+    concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label))); // 5. Rótulo Fim
+
+    // Limpeza de strings auxiliares (strdup foi usado dentro das funções de create, então podemos liberar estas)
+    free(true_label);
+    free(end_label);
                    }
                    ;
 
@@ -290,13 +322,35 @@ atribuicao: TK_ID TK_ATRIB expressao {
                     semantic_error(ERR_WRONG_TYPE, $1.numero_linha, "Tipo da expressão incompatível com a variável.");
                 }
 
-                $$ = asd_new(":=");
-                $$->data_type = symbol->type;
-                asd_tree_t* id_node = asd_new($1.valor);
-                id_node->data_type = symbol->type;
-                asd_add_child($$, id_node); 
-                asd_add_child($$, $3);     
-                free($1.valor);
+$$ = asd_new(":=");
+        $$->data_type = symbol->type;
+        asd_tree_t* id_node = asd_new($1.valor); // Recriando nó ID para visualização
+        id_node->data_type = symbol->type;
+        asd_add_child($$, id_node);
+        asd_add_child($$, $3);
+
+        // --- GERAÇÃO DE CÓDIGO ---
+        // 1. Herda o código da expressão
+        $$->code = $3->code;
+        $3->code = NULL; // <--- CORREÇÃO CRÍTICA: O pai assume o código, o filho não deve mais apontar para ele.
+
+        // 2. Gera o store
+        ILOC_Operand* op_src = new_operand(ILOC_OP_REG, $3->temp_result);
+        
+        char* base_reg = "rfp";
+        // Lógica de rbss se necessário...
+        ILOC_Operand* op_base = new_operand(ILOC_OP_REG, base_reg);
+        
+        char str_offset[16];
+        sprintf(str_offset, "%d", symbol->address); 
+        ILOC_Operand* op_offset = new_operand(ILOC_OP_CONST, str_offset);
+
+        ILOC_Op* op_store = new_operation("storeAI", op_src, op_base, op_offset);
+        
+        // Anexa ao final
+        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_store)));
+        
+        free($1.valor);
             };
 
 chamada_funcao: TK_ID '(' ')' {
@@ -407,12 +461,13 @@ expr_aditiva: expr_aditiva '+' expr_multiplicativa {
     ILOC_Op* op_add = new_operation("add", src1, src2, dest);
 
     // 3. Concatena listas: CodigoEsq + CodigoDir + InstrucaoSoma
-    $$->code = $1->code; // Começa com o código da esquerda
-    concat_iloc_lists($$->code, $3->code); // Adiciona o código da direita
+	$$->code = $1->code;
+    $1->code = NULL; // <--- O pai assumiu a lista da esquerda
+
+    concat_iloc_lists($$->code, $3->code);
+    $3->code = NULL; // <--- A lista da direita foi fundida e destruída, zere o ponteiro.
     
-    // Adiciona a instrução 'add' ao final
-    ILOC_List* list_op = new_iloc_list(new_iloc_node(op_add));
-    concat_iloc_lists($$->code, list_op);
+concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_add)));
 }
 	| expr_aditiva '-' expr_multiplicativa { 
                 $$ = asd_new_binary_op("-", $1, $3); 
@@ -495,8 +550,37 @@ fator: TK_ID {
                semantic_error(ERR_FUNCTION, $1.numero_linha, $1.valor);
            }
            $$ = asd_new($1.valor);
-           $$->data_type = symbol->type;
-           free($1.valor);
+    $$->data_type = symbol->type;
+    
+    // --- GERAÇÃO DE CÓDIGO (Load Variable) ---
+    $$->temp_result = new_temp(); // Registrador onde o valor vai ficar
+    
+    // Define a base dependendo se é global ou local
+    // (Simplificação: assumindo local=rfp por enquanto. No futuro verificar escopo)
+char* base_reg;
+base_reg = "rfp";
+    if (symbol->nature == NATURE_VARIABLE /* && verificar se é global */) {
+        // base_reg = "rbss"; // Se fosse global
+    }
+
+    // Cria operando de origem: rfp (ou rbss)
+    ILOC_Operand* op_base = new_operand(ILOC_OP_REG, base_reg);
+    
+    // Cria operando de offset (Endereço da variável). 
+    // OBS: Você precisará calcular esse endereço na declaração. Vamos por '0' ou '4' de teste.
+    char str_offset[16];
+    sprintf(str_offset, "%d", symbol->address);
+    ILOC_Operand* op_offset = new_operand(ILOC_OP_CONST, str_offset);
+    
+    // Cria operando de destino
+    ILOC_Operand* op_dest = new_operand(ILOC_OP_REG, $$->temp_result);
+
+    // Instrução: loadAI base, offset => temp
+    ILOC_Op* op_load = new_operation("loadAI", op_base, op_offset, op_dest);
+    
+    $$->code = new_iloc_list(new_iloc_node(op_load));
+    
+    free($1.valor);
        }
      | literal        { $$ = $1; }
      | chamada_funcao { $$ = $1; }
