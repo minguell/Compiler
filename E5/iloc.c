@@ -153,34 +153,52 @@ void print_program(ILOC_List* program) {
         if (op) {
             printf("%s", op->opcode);
 
-            // Tratamento especial para cbr: cbr r1 -> L1, L2
-            if (strcmp(op->opcode, "cbr") == 0) {
-                printf(" %s -> %s, %s", op->args[0]->value, op->args[1]->value, op->args[2]->value);
+            // 1. Instruções de Controle de Fluxo (usam ->)
+            // jumpI, jump, cbr, cmp_LT, cmp_EQ, etc...
+            int is_arrow_control = (op->opcode[0] == 'j' || 
+                                    op->opcode[0] == 'c'); // pega cbr e cmp_XX
+            
+            char* arrow = is_arrow_control ? "->" : "=>";
+
+            // --- TRATAMENTO DE EXCEÇÕES DE FORMATO ---
+
+            // CASO 1: loadI (Constante => Registrador)
+            if (strcmp(op->opcode, "loadI") == 0) {
+                // parser: new_operation("loadI", const, dest, NULL)
+                // args[0]=const, args[1]=dest
+                printf(" %s => %s", op->args[0]->value, op->args[1]->value);
             }
-            // Tratamento para storeAI e storeAO: storeAI r1 => r2, c3
-            else if (strcmp(op->opcode, "storeAI") == 0 || strcmp(op->opcode, "storeAO") == 0) {
+            // CASO 2: storeAI (Origem => Base, Offset)
+            else if (strcmp(op->opcode, "storeAI") == 0) {
+                // parser: new_operation("storeAI", src, base, off)
                 printf(" %s => %s, %s", op->args[0]->value, op->args[1]->value, op->args[2]->value);
             }
-            // Tratamento para jumpI: jumpI -> L1
+            // CASO 3: cbr (Condição -> LabelTrue, LabelFalse)
+            else if (strcmp(op->opcode, "cbr") == 0) {
+                 // parser: new_operation("cbr", cond, lblT, lblF)
+                 printf(" %s -> %s, %s", op->args[0]->value, op->args[1]->value, op->args[2]->value);
+            }
+            // CASO 4: jumpI (-> Label)
             else if (strcmp(op->opcode, "jumpI") == 0) {
-                printf(" -> %s", op->args[0]->value);
+                 printf(" -> %s", op->args[0]->value);
             }
-            // Tratamento para jump: jump -> r1
+            // CASO 5: jump (-> Register)
             else if (strcmp(op->opcode, "jump") == 0) {
-                printf(" -> %s", op->args[0]->value);
+                 printf(" -> %s", op->args[0]->value);
             }
-            // Padrão geral para aritmética e loads (add r1, r2 => r3 ou loadAI r1, c2 => r3)
+            // CASO 6: Operações Aritméticas/Lógicas/LoadAI Genéricas (3 argumentos)
+            // Ex: add r1, r2 => r3
+            // Ex: loadAI r1, c2 => r3 (parser põe r1 em arg0, c2 em arg1, r3 em arg2)
+            // Ex: cmp_EQ r1, r2 -> r3
             else {
-                if (op->args[0]) printf(" %s", op->args[0]->value);
-                if (op->args[1]) printf(", %s", op->args[1]->value);
-                if (op->args[2]) printf(" => %s", op->args[2]->value);
-                // Nota: loadI c1 => r1 (args[0]=c1, args[1]=NULL, args[2]=r1)? 
-                // No parser você fez: new_operation("loadI", op_const, op_dest, NULL);
-                // Então loadI tem args[0] e args[1]. 
-                // Correção para loadI (caso args[2] seja NULL e não seja jump):
-                if (!op->args[2] && op->args[1] && op->opcode[0] != 'j' && op->opcode[0] != 'c') {
-                     printf(" => %s", op->args[1]->value);
-                }
+                 // Se tiver arg[0], imprime
+                 if (op->args[0]) printf(" %s", op->args[0]->value);
+                 
+                 // Se tiver arg[1], imprime ", arg[1]"
+                 if (op->args[1]) printf(", %s", op->args[1]->value);
+                 
+                 // Se tiver arg[2], imprime " seta arg[2]"
+                 if (op->args[2]) printf(" %s %s", arrow, op->args[2]->value);
             }
         }
         printf("\n");
