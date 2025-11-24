@@ -138,14 +138,21 @@ declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
                          free($2.valor);
                    };
 
-declaracao_funcao: cabecalho_funcao bloco_de_comandos {
+declaracao_funcao: cabecalho_funcao '[' sequencia_comandos ']' {
         $$ = $1;
-        if ($2 != NULL) {
-           asd_add_child($$, $2); // <--- CORREÇÃO 1: Adiciona o corpo como filho
-           
-           $$->code = $2->code;
-           $2->code = NULL;       // <--- CORREÇÃO 2: Transfere a posse do código para evitar Double Free
+        if ($3 != NULL) {
+           asd_add_child($$, $3);
+           // Concatena código do corpo
+           $$->code = safe_concat($$->code, $3->code);
+           $3->code = NULL;
         }
+        // Removemos o escopo criado no cabecalho_funcao
+        // Como não chamamos bloco_de_comandos, não houve um push_scope extra aqui dentro
+        pop_scope();
+        current_function = NULL;
+   }
+   | cabecalho_funcao '[' ']' {
+        $$ = $1;
         pop_scope();
         current_function = NULL;
    };
