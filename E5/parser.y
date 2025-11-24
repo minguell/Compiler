@@ -87,7 +87,7 @@ lista:  elemento                { $$ = $1; }
                                     if ($1 != NULL) {
                                         if ($3 != NULL) {
                                             asd_add_child($1, $3);
-                                            concat_iloc_lists($1->code, $3->code);
+                                            $1->code = safe_concat($1->code, $3->code);
                                             $3->code = NULL;
                                         }
                                         $$ = $1;
@@ -134,7 +134,7 @@ declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
                          ILOC_Operand* op_off = new_operand(ILOC_OP_CONST, str_offset);
                          
                          ILOC_Op* op_store = new_operation("storeAI", op_src, op_base, op_off);
-                         concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_store)));
+                         $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_store)));
                          free($2.valor);
                    };
 
@@ -254,27 +254,27 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
                         $3->code = NULL;
                         // cbr r_cond -> L_true, L_false
                         ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_false);
-                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_cbr)));
 
                         // 2. Rótulo True + Bloco True + JumpI para o fim
-                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_label_node(true_label)));
                         if ($5 != NULL) {
-                            concat_iloc_lists($$->code, $5->code);
+                            $$->code = safe_concat($$->code, $5->code);
                             $5->code = NULL;
                         }
                         // jumpI -> L_end (pula o else)
                         ILOC_Op* op_jump = new_operation("jumpI", op_lbl_end, NULL, NULL);
-                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_jump)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_jump)));
 
                         // 3. Rótulo False + Bloco Else
-                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(false_label)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_label_node(false_label)));
                         if ($7 != NULL) {
-                            concat_iloc_lists($$->code, $7->code);
+                            $$->code = safe_concat($$->code, $7->code);
                             $7->code = NULL;
                         }
 
                         // 4. Rótulo Fim
-                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_label_node(end_label)));
 
                         free(true_label); free(false_label); free(end_label);
                    }
@@ -301,17 +301,17 @@ unmatched_statement: TK_SE '(' expressao ')' comando {
                         $$->code = $3->code;
                         $3->code = NULL;
                         ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_end);
-                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_cbr)));
 
                         // 2. Rótulo True + Bloco
-                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_label_node(true_label)));
                         if ($5 != NULL) {
-                            concat_iloc_lists($$->code, $5->code);
+                            $$->code = safe_concat($$->code, $5->code);
                             $5->code = NULL;
                         }
 
                         // 3. Rótulo Fim
-                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_label_node(end_label)));
                         
                         free(true_label); free(end_label);
                    }
@@ -337,28 +337,27 @@ unmatched_statement: TK_SE '(' expressao ')' comando {
                         $$->code = $3->code;
                         $3->code = NULL;
                         ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_false);
-                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_cbr)));
 
                         // 2. Rótulo True + Bloco True + JumpI End
-                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_label_node(true_label)));
                         if ($5 != NULL) {
-                            concat_iloc_lists($$->code, $5->code);
+                            $$->code = safe_concat($$->code, $5->code);
                             $5->code = NULL;
                         }
                         // Faltava este Jump para pular o else
                         ILOC_Op* op_jump = new_operation("jumpI", op_lbl_end, NULL, NULL); 
-                        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_jump)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_jump)));
 
                         // 3. Rótulo False + Bloco Else
-                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(false_label)));
+                        $$->code = safe_concat($$->code, new_iloc_list(new_label_node(false_label)));
                         if ($7 != NULL) {
-                            concat_iloc_lists($$->code, $7->code);
+                            $$->code = safe_concat($$->code, $7->code);
                             $7->code = NULL;
                         }
 
                         // 4. Rótulo Fim
-                        concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label)));
-
+                        $$->code = safe_concat($$->code, new_iloc_list(new_label_node(end_label)));
                         free(true_label); free(false_label); free(end_label);
                    }
                    ;
@@ -431,7 +430,7 @@ atribuicao: TK_ID TK_ATRIB expressao {
                 ILOC_Op* op_store = new_operation("storeAI", op_src, op_base, op_offset);
                 
                 // Anexa ao final
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_store)));
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_store)));
                 
                 free($1.valor);
             };
@@ -513,25 +512,25 @@ repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos {
                 $$->code = new_iloc_list(new_label_node(start_label));
 
                 // 2. Código da Condição + CBR -> True, End
-                concat_iloc_lists($$->code, $3->code);
+                $$->code = safe_concat($$->code, $3->code);
                 $3->code = NULL;
 
                 ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_end);
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_cbr)));
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_cbr)));
 
                 // 3. Rótulo True + Corpo do Loop
-                concat_iloc_lists($$->code, new_iloc_list(new_label_node(true_label)));
+                $$->code = safe_concat($$->code, new_iloc_list(new_label_node(true_label)));
                 if ($5 != NULL) {
-                    concat_iloc_lists($$->code, $5->code);
+                    $$->code = safe_concat($$->code, $5->code);
                     $5->code = NULL;
                 }
 
                 // 4. Jump incondicional de volta ao Início
                 ILOC_Op* op_jump = new_operation("jumpI", op_lbl_start, NULL, NULL);
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_jump)));
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_jump)));
 
                 // 5. Rótulo Fim (saída do loop)
-                concat_iloc_lists($$->code, new_iloc_list(new_label_node(end_label)));
+                $$->code = safe_concat($$->code, new_iloc_list(new_label_node(end_label)));
 
                 free(start_label); free(true_label); free(end_label);
            };
@@ -551,9 +550,10 @@ expr_logica_ou: expr_logica_ou '|' expr_logica_e {
         ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
         ILOC_Op* op = new_operation("or", src1, src2, dest); // opcode "or"
 
-        $$->code = $1->code; $1->code = NULL;
-        concat_iloc_lists($$->code, $3->code); $3->code = NULL;
-        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+        $$->code = safe_concat($1->code, $3->code);
+        $1->code = NULL;
+        $3->code = NULL;
+        $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
         | expr_logica_e { $$ = $1; }
         ;
 
@@ -566,9 +566,10 @@ expr_logica_e: expr_logica_e '&' expr_igualdade {
     ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
     ILOC_Op* op = new_operation("and", src1, src2, dest); // opcode "and"
 
-    $$->code = $1->code; $1->code = NULL;
-    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
-    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+    $$->code = safe_concat($1->code, $3->code);
+    $1->code = NULL;
+    $3->code = NULL;
+    $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
     | expr_igualdade                  { $$ = $1; }
     ;
 
@@ -580,10 +581,10 @@ expr_igualdade: expr_igualdade TK_OC_EQ expr_relacional {
                 ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
                 ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
                 ILOC_Op* op = new_operation("cmp_EQ", src1, src2, dest);
-
-                $$->code = $1->code; $1->code = NULL;
-                concat_iloc_lists($$->code, $3->code); $3->code = NULL;
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));} 
+                $$->code = safe_concat($1->code, $3->code);
+                $1->code = NULL;
+                $3->code = NULL;
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));} 
               | expr_igualdade TK_OC_NE expr_relacional { 
                 $$ = asd_new_binary_op("!=", $1, $3); 
                 check_types($$, $1, $3); 
@@ -593,9 +594,10 @@ expr_igualdade: expr_igualdade TK_OC_EQ expr_relacional {
                 ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
                 ILOC_Op* op = new_operation("cmp_NE", src1, src2, dest);
 
-                $$->code = $1->code; $1->code = NULL;
-                concat_iloc_lists($$->code, $3->code); $3->code = NULL;
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+                $$->code = safe_concat($1->code, $3->code);
+                $1->code = NULL;
+                $3->code = NULL;
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
               | expr_relacional                         { $$ = $1; }
               ;
 
@@ -607,9 +609,10 @@ expr_relacional: expr_relacional '<' expr_aditiva      {
                         new_operand(ILOC_OP_REG, $1->temp_result), 
                         new_operand(ILOC_OP_REG, $3->temp_result), 
                         new_operand(ILOC_OP_REG, $$->temp_result));
-                    $$->code = $1->code; $1->code = NULL;
-                    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
-                    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+                    $$->code = safe_concat($1->code, $3->code);
+                    $1->code = NULL;
+                    $3->code = NULL;
+                    $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
                | expr_relacional '>' expr_aditiva      { 
                     $$ = asd_new_binary_op(">", $1, $3); 
                     check_types($$, $1, $3); 
@@ -618,9 +621,10 @@ expr_relacional: expr_relacional '<' expr_aditiva      {
                         new_operand(ILOC_OP_REG, $1->temp_result), 
                         new_operand(ILOC_OP_REG, $3->temp_result), 
                         new_operand(ILOC_OP_REG, $$->temp_result));
-                    $$->code = $1->code; $1->code = NULL;
-                    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
-                    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+                    $$->code = safe_concat($1->code, $3->code);
+                    $1->code = NULL;
+                    $3->code = NULL;
+                    $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
                | expr_relacional TK_OC_LE expr_aditiva { 
                     $$ = asd_new_binary_op("<=", $1, $3); 
                     check_types($$, $1, $3); 
@@ -629,9 +633,10 @@ expr_relacional: expr_relacional '<' expr_aditiva      {
                         new_operand(ILOC_OP_REG, $1->temp_result), 
                         new_operand(ILOC_OP_REG, $3->temp_result), 
                         new_operand(ILOC_OP_REG, $$->temp_result));
-                    $$->code = $1->code; $1->code = NULL;
-                    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
-                    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+                    $$->code = safe_concat($1->code, $3->code);
+                    $1->code = NULL;
+                    $3->code = NULL;
+                    $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
                | expr_relacional TK_OC_GE expr_aditiva { 
                     $$ = asd_new_binary_op(">=", $1, $3); 
                     check_types($$, $1, $3); 
@@ -640,9 +645,10 @@ expr_relacional: expr_relacional '<' expr_aditiva      {
                         new_operand(ILOC_OP_REG, $1->temp_result), 
                         new_operand(ILOC_OP_REG, $3->temp_result), 
                         new_operand(ILOC_OP_REG, $$->temp_result));
-                    $$->code = $1->code; $1->code = NULL;
-                    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
-                    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+                    $$->code = safe_concat($1->code, $3->code);
+                    $1->code = NULL;
+                    $3->code = NULL;
+                    $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
                | expr_aditiva                          { $$ = $1;}
                ;
 
@@ -662,15 +668,14 @@ expr_aditiva: expr_aditiva '+' expr_multiplicativa {
     ILOC_Op* op_add = new_operation("add", src1, src2, dest);
 
     // 3. Concatena listas: CodigoEsq + CodigoDir + InstrucaoSoma
-	$$->code = $1->code;
-    $1->code = NULL; // <--- O pai assumiu a lista da esquerda
+    $$->code = safe_concat($1->code, $3->code);
 
-    concat_iloc_lists($$->code, $3->code);
-    $3->code = NULL; // <--- A lista da direita foi fundida e destruída, zere o ponteiro.
+    $1->code = NULL;
+
+    $3->code = NULL;
     
-concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_add)));
-}
-	| expr_aditiva '-' expr_multiplicativa { 
+    $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_add)));}
+    | expr_aditiva '-' expr_multiplicativa { 
                 $$ = asd_new_binary_op("-", $1, $3); 
                 check_types($$, $1, $3);
 
@@ -684,11 +689,11 @@ concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_add)));
                 
                 // Note o opcode "sub"
                 ILOC_Op* op = new_operation("sub", src1, src2, dest);
-
                 // 3. Concatena: CodigoEsq + CodigoDir + InstrucaoSub
-                $$->code = $1->code;
-                concat_iloc_lists($$->code, $3->code);
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));
+                $$->code = safe_concat($1->code, $3->code);
+                $1->code = NULL;
+                $3->code = NULL;
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));
             }
             | expr_multiplicativa                  { $$ = $1; }
             ;
@@ -707,10 +712,10 @@ expr_multiplicativa: expr_multiplicativa '*' expr_unaria {
                 
                 // Note o opcode "mult"
                 ILOC_Op* op = new_operation("mult", src1, src2, dest);
-
-                $$->code = $1->code;
-                concat_iloc_lists($$->code, $3->code);
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));
+                $$->code = safe_concat($1->code, $3->code);
+                $1->code = NULL;
+                $3->code = NULL;
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));
             }
                    | expr_multiplicativa '/' expr_unaria { 
                 $$ = asd_new_binary_op("/", $1, $3); 
@@ -727,9 +732,10 @@ expr_multiplicativa: expr_multiplicativa '*' expr_unaria {
                 // Note o opcode "div"
                 ILOC_Op* op = new_operation("div", src1, src2, dest);
 
-                $$->code = $1->code;
-                concat_iloc_lists($$->code, $3->code);
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));
+                $$->code = safe_concat($1->code, $3->code);
+                $1->code = NULL;
+                $3->code = NULL;
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));
             }
                    | expr_multiplicativa '%' expr_unaria { $$ = asd_new_binary_op("%", $1, $3); check_types($$, $1, $3); }
                    | expr_unaria                         { $$ = $1; }
@@ -751,7 +757,7 @@ expr_unaria: '+' fator {
                 ILOC_Op* op = new_operation("rsubI", src, zero, dest);
 
                 $$->code = $2->code; $2->code = NULL;
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
            | '!' fator { 
                 $$ = asd_new_unary_op("!", $2); 
                 $$->data_type = $2->data_type; 
@@ -761,7 +767,7 @@ expr_unaria: '+' fator {
                 ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
                 ILOC_Op* op = new_operation("xorI", src, one, dest);
                 $$->code = $2->code; $2->code = NULL;
-                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+                $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op)));}
            | fator     { $$ = $1; }
            ;
 

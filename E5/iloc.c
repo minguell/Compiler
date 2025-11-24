@@ -135,6 +135,13 @@ ILOC_Node* new_label_node(char* label) {
     return node;
 }
 
+ILOC_List* safe_concat(ILOC_List* list1, ILOC_List* list2) {
+    if (!list1) return list2;
+    if (!list2) return list1;
+    
+    concat_iloc_lists(list1, list2);
+    return list1;
+}
 
 void print_program(ILOC_List* program) {
     if (!program) return;
@@ -144,10 +151,37 @@ void print_program(ILOC_List* program) {
 
         ILOC_Op* op = current->instr;
         if (op) {
-            printf("%s ", op->opcode);
-            // Lógica para imprimir operandos (args[0], args[1] => args[2])
-            // Depende do tipo de instrução (ex: jump só tem seta ->)
-            // Implemente checando op->opcode ou num_args
+            printf("%s", op->opcode);
+
+            // Tratamento especial para cbr: cbr r1 -> L1, L2
+            if (strcmp(op->opcode, "cbr") == 0) {
+                printf(" %s -> %s, %s", op->args[0]->value, op->args[1]->value, op->args[2]->value);
+            }
+            // Tratamento para storeAI e storeAO: storeAI r1 => r2, c3
+            else if (strcmp(op->opcode, "storeAI") == 0 || strcmp(op->opcode, "storeAO") == 0) {
+                printf(" %s => %s, %s", op->args[0]->value, op->args[1]->value, op->args[2]->value);
+            }
+            // Tratamento para jumpI: jumpI -> L1
+            else if (strcmp(op->opcode, "jumpI") == 0) {
+                printf(" -> %s", op->args[0]->value);
+            }
+            // Tratamento para jump: jump -> r1
+            else if (strcmp(op->opcode, "jump") == 0) {
+                printf(" -> %s", op->args[0]->value);
+            }
+            // Padrão geral para aritmética e loads (add r1, r2 => r3 ou loadAI r1, c2 => r3)
+            else {
+                if (op->args[0]) printf(" %s", op->args[0]->value);
+                if (op->args[1]) printf(", %s", op->args[1]->value);
+                if (op->args[2]) printf(" => %s", op->args[2]->value);
+                // Nota: loadI c1 => r1 (args[0]=c1, args[1]=NULL, args[2]=r1)? 
+                // No parser você fez: new_operation("loadI", op_const, op_dest, NULL);
+                // Então loadI tem args[0] e args[1]. 
+                // Correção para loadI (caso args[2] seja NULL e não seja jump):
+                if (!op->args[2] && op->args[1] && op->opcode[0] != 'j' && op->opcode[0] != 'c') {
+                     printf(" => %s", op->args[1]->value);
+                }
+            }
         }
         printf("\n");
         current = current->next;
