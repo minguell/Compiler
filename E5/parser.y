@@ -202,7 +202,11 @@ bloco_de_comandos: '[' { push_scope(); } ']'            { pop_scope(); $$ = NULL
 sequencia_comandos:   comando                       { $$ = $1; }
                     | comando sequencia_comandos    { 
                                     if ($1 != NULL) {
-                                        if ($2 != NULL) asd_add_child($1, $2);
+                                        if ($2 != NULL) {
+                                            asd_add_child($1, $2);
+                                            $1->code = safe_concat($1->code, $2->code);
+                                            $2->code = NULL;
+                                        }
                                         $$ = $1;
                                     } else {
                                         $$ = $2;
@@ -468,12 +472,22 @@ chamada_funcao: TK_ID '(' ')' {
                     $$ = asd_new(label);
                     $$->data_type = symbol->type;
                     asd_add_child($$, $3); 
+                    $$->code = $3->code;
+                    $3->code = NULL;                    
                     free($1.valor);
                 }
               ;
               
-argumentos: expressao                { $$ = asd_new("args"); asd_add_child($$, $1); }
-          | expressao ',' argumentos { asd_add_child($1, $3); $$ = $1; }
+argumentos: expressao { 
+                $$ = asd_new("args"); 
+                asd_add_child($$, $1); 
+                $$->code = $1->code;
+                $1->code = NULL;}
+          | expressao ',' argumentos { 
+                asd_add_child($1, $3); 
+                $$ = $1; 
+                $$->code = safe_concat($1->code, $3->code);
+                $3->code = NULL;}
           ;
 
 retorno: TK_RETORNA expressao TK_ATRIB tipo_num { 
@@ -489,6 +503,8 @@ retorno: TK_RETORNA expressao TK_ATRIB tipo_num {
             $$ = asd_new("retorna");
             $$->data_type = $2->data_type;
             asd_add_child($$, $2);
+            $$->code = $2->code;
+            $2->code = NULL;
          };
 
 repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos {	

@@ -153,10 +153,10 @@ void print_program(ILOC_List* program) {
         if (op) {
             printf("%s", op->opcode);
 
-            // 1. Instruções de Controle de Fluxo (usam ->)
-            // jumpI, jump, cbr, cmp_LT, cmp_EQ, etc...
-            int is_arrow_control = (op->opcode[0] == 'j' || 
-                                    op->opcode[0] == 'c'); // pega cbr e cmp_XX
+            // MUDANÇA AQUI: Apenas cbr e jumps usam ->
+            int is_arrow_control = (strcmp(op->opcode, "cbr") == 0 || 
+                                    strcmp(op->opcode, "jump") == 0 ||
+                                    strcmp(op->opcode, "jumpI") == 0);
             
             char* arrow = is_arrow_control ? "->" : "=>";
 
@@ -164,18 +164,14 @@ void print_program(ILOC_List* program) {
 
             // CASO 1: loadI (Constante => Registrador)
             if (strcmp(op->opcode, "loadI") == 0) {
-                // parser: new_operation("loadI", const, dest, NULL)
-                // args[0]=const, args[1]=dest
                 printf(" %s => %s", op->args[0]->value, op->args[1]->value);
             }
             // CASO 2: storeAI (Origem => Base, Offset)
             else if (strcmp(op->opcode, "storeAI") == 0) {
-                // parser: new_operation("storeAI", src, base, off)
                 printf(" %s => %s, %s", op->args[0]->value, op->args[1]->value, op->args[2]->value);
             }
             // CASO 3: cbr (Condição -> LabelTrue, LabelFalse)
             else if (strcmp(op->opcode, "cbr") == 0) {
-                 // parser: new_operation("cbr", cond, lblT, lblF)
                  printf(" %s -> %s, %s", op->args[0]->value, op->args[1]->value, op->args[2]->value);
             }
             // CASO 4: jumpI (-> Label)
@@ -186,18 +182,10 @@ void print_program(ILOC_List* program) {
             else if (strcmp(op->opcode, "jump") == 0) {
                  printf(" -> %s", op->args[0]->value);
             }
-            // CASO 6: Operações Aritméticas/Lógicas/LoadAI Genéricas (3 argumentos)
-            // Ex: add r1, r2 => r3
-            // Ex: loadAI r1, c2 => r3 (parser põe r1 em arg0, c2 em arg1, r3 em arg2)
-            // Ex: cmp_EQ r1, r2 -> r3
+            // CASO 6: Padrão Geral (inclui cmp_XX, add, sub, etc)
             else {
-                 // Se tiver arg[0], imprime
                  if (op->args[0]) printf(" %s", op->args[0]->value);
-                 
-                 // Se tiver arg[1], imprime ", arg[1]"
                  if (op->args[1]) printf(", %s", op->args[1]->value);
-                 
-                 // Se tiver arg[2], imprime " seta arg[2]"
                  if (op->args[2]) printf(" %s %s", arrow, op->args[2]->value);
             }
         }
