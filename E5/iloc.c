@@ -1,3 +1,5 @@
+/* Augusto Mattei Grohmnann - 550429
+ Miguel Dutra Fontes Guerra - 342573 */
 /* iloc.c */
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,14 +13,14 @@ static int temp_count = 0;
 
 char *new_label() {
     char buffer[64];
-    // Gera rótulo no formato L0, L1, ... [cite: 98]
+    // Gera rótulo no formato L0, L1, ... 
     snprintf(buffer, 64, "L%d", label_count++);
     return strdup(buffer);
 }
 
 char *new_temp() {
     char buffer[64];
-    // Gera temporário no formato r0, r1, ... [cite: 97]
+    // Gera temporário no formato r0, r1, ...
     snprintf(buffer, 64, "r%d", temp_count++);
     return strdup(buffer);
 }
@@ -131,4 +133,23 @@ ILOC_Node* new_label_node(char* label) {
     ILOC_Node* node = new_iloc_node(op);
     node->label = strdup(label); // Define o rótulo do nó
     return node;
+}
+
+
+void print_program(ILOC_List* program) {
+    if (!program) return;
+    ILOC_Node* current = program->head;
+    while (current) {
+        if (current->label) printf("%s: ", current->label);
+
+        ILOC_Op* op = current->instr;
+        if (op) {
+            printf("%s ", op->opcode);
+            // Lógica para imprimir operandos (args[0], args[1] => args[2])
+            // Depende do tipo de instrução (ex: jump só tem seta ->)
+            // Implemente checando op->opcode ou num_args
+        }
+        printf("\n");
+        current = current->next;
+    }
 }

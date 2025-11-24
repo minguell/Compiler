@@ -1,3 +1,5 @@
+/* Augusto Mattei Grohmnann - 550429
+ Miguel Dutra Fontes Guerra - 342573 */
 // iloc.h
 #ifndef _ILOC_H_
 #define _ILOC_H_
@@ -15,7 +17,7 @@ typedef struct {
     char *value;    // Armazena o nome do reg, label ou valor da constante como string
 } ILOC_Operand;
 
-// Estrutura para uma operação ILOC [cite: 9]
+// Estrutura para uma operação ILOC
 typedef struct {
     char *opcode;           // Mnemônico da instrução (ex: "add", "loadAI")
     ILOC_Operand *args[3];  // Operandos (máximo 3 geralmente: src1, src2, dest)

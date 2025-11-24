@@ -87,6 +87,8 @@ lista:  elemento                { $$ = $1; }
                                     if ($1 != NULL) {
                                         if ($3 != NULL) {
                                             asd_add_child($1, $3);
+                                            concat_iloc_lists($1->code, $3->code);
+                                            $3->code = NULL;
                                         }
                                         $$ = $1;
                                     } else {
@@ -105,7 +107,7 @@ declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
                          $$ = NULL; // Declaração simples não gera nó na AST
                     }
                    | TK_VAR TK_ID TK_ATRIB tipo_num TK_COM literal {
-                         add_symbol($2.valor, $2.numero_linha, NATURE_VARIABLE, $4);
+                         symbol_t* s = add_symbol($2.valor, $2.numero_linha, NATURE_VARIABLE, $4);
                          
                          if ($4 != $6->data_type) {
                             semantic_error(ERR_WRONG_TYPE, $2.numero_linha, "Tipo do literal de inicialização é incompatível com a variável.");
@@ -117,6 +119,22 @@ declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
                          id_node->data_type = $4;
                          asd_add_child($$, id_node);
                          asd_add_child($$, $6);
+                         // 1. O código do literal (loadI) já está em $6->code. O valor está em $6->temp_result.
+                         $$->code = $6->code;
+                         $6->code = NULL;
+
+                         // 2. Determina Base e Offset
+                         char* base_reg = (s->is_global) ? "rbss" : "rfp";
+                         char str_offset[16];
+                         sprintf(str_offset, "%d", s->address);
+
+                         // 3. Gera storeAI reg_valor => base, offset
+                         ILOC_Operand* op_src = new_operand(ILOC_OP_REG, $6->temp_result);
+                         ILOC_Operand* op_base = new_operand(ILOC_OP_REG, base_reg);
+                         ILOC_Operand* op_off = new_operand(ILOC_OP_CONST, str_offset);
+                         
+                         ILOC_Op* op_store = new_operation("storeAI", op_src, op_base, op_off);
+                         concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op_store)));
                          free($2.valor);
                    };
 
@@ -409,7 +427,7 @@ atribuicao: TK_ID TK_ATRIB expressao {
                 char str_offset[16];
                 sprintf(str_offset, "%d", symbol->address); 
                 ILOC_Operand* op_offset = new_operand(ILOC_OP_CONST, str_offset);
-
+                ILOC_Operand* op_src = new_operand(ILOC_OP_REG, $3->temp_result);
                 ILOC_Op* op_store = new_operation("storeAI", op_src, op_base, op_offset);
                 
                 // Anexa ao final
@@ -524,23 +542,107 @@ tipo_num: TK_DECIMAL { $$ = TYPE_FLOAT; }
 
 expressao: expr_logica_ou { $$ = $1; };
 
-expr_logica_ou: expr_logica_ou '|' expr_logica_e { $$ = asd_new_binary_op("|", $1, $3); check_types($$, $1, $3); }
-              | expr_logica_e                   { $$ = $1; }
-              ;
+expr_logica_ou: expr_logica_ou '|' expr_logica_e {
+        $$ = asd_new_binary_op("|", $1, $3); 
+        check_types($$, $1, $3); 
+        $$->temp_result = new_temp();
+        ILOC_Operand* src1 = new_operand(ILOC_OP_REG, $1->temp_result);
+        ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
+        ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+        ILOC_Op* op = new_operation("or", src1, src2, dest); // opcode "or"
 
-expr_logica_e: expr_logica_e '&' expr_igualdade { $$ = asd_new_binary_op("&", $1, $3); check_types($$, $1, $3); }
-             | expr_igualdade                  { $$ = $1; }
-             ;
+        $$->code = $1->code; $1->code = NULL;
+        concat_iloc_lists($$->code, $3->code); $3->code = NULL;
+        concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+        | expr_logica_e { $$ = $1; }
+        ;
 
-expr_igualdade: expr_igualdade TK_OC_EQ expr_relacional { $$ = asd_new_binary_op("==", $1, $3); check_types($$, $1, $3); } 
-              | expr_igualdade TK_OC_NE expr_relacional { $$ = asd_new_binary_op("!=", $1, $3); check_types($$, $1, $3); }
+expr_logica_e: expr_logica_e '&' expr_igualdade { 
+    $$ = asd_new_binary_op("&", $1, $3); 
+    check_types($$, $1, $3); 
+    $$->temp_result = new_temp();
+    ILOC_Operand* src1 = new_operand(ILOC_OP_REG, $1->temp_result);
+    ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
+    ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+    ILOC_Op* op = new_operation("and", src1, src2, dest); // opcode "and"
+
+    $$->code = $1->code; $1->code = NULL;
+    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
+    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+    | expr_igualdade                  { $$ = $1; }
+    ;
+
+expr_igualdade: expr_igualdade TK_OC_EQ expr_relacional { 
+                $$ = asd_new_binary_op("==", $1, $3); 
+                check_types($$, $1, $3); 
+                $$->temp_result = new_temp();
+                ILOC_Operand* src1 = new_operand(ILOC_OP_REG, $1->temp_result);
+                ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
+                ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+                ILOC_Op* op = new_operation("cmp_EQ", src1, src2, dest);
+
+                $$->code = $1->code; $1->code = NULL;
+                concat_iloc_lists($$->code, $3->code); $3->code = NULL;
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));} 
+              | expr_igualdade TK_OC_NE expr_relacional { 
+                $$ = asd_new_binary_op("!=", $1, $3); 
+                check_types($$, $1, $3); 
+                $$->temp_result = new_temp();
+                ILOC_Operand* src1 = new_operand(ILOC_OP_REG, $1->temp_result);
+                ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
+                ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+                ILOC_Op* op = new_operation("cmp_NE", src1, src2, dest);
+
+                $$->code = $1->code; $1->code = NULL;
+                concat_iloc_lists($$->code, $3->code); $3->code = NULL;
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
               | expr_relacional                         { $$ = $1; }
               ;
 
-expr_relacional: expr_relacional '<' expr_aditiva      { $$ = asd_new_binary_op("<", $1, $3); check_types($$, $1, $3); }
-               | expr_relacional '>' expr_aditiva      { $$ = asd_new_binary_op(">", $1, $3); check_types($$, $1, $3); }
-               | expr_relacional TK_OC_LE expr_aditiva { $$ = asd_new_binary_op("<=", $1, $3); check_types($$, $1, $3); }
-               | expr_relacional TK_OC_GE expr_aditiva { $$ = asd_new_binary_op(">=", $1, $3); check_types($$, $1, $3); }
+expr_relacional: expr_relacional '<' expr_aditiva      { 
+                    $$ = asd_new_binary_op("<", $1, $3); 
+                    check_types($$, $1, $3); 
+                    $$->temp_result = new_temp();
+                    ILOC_Op* op = new_operation("cmp_LT", 
+                        new_operand(ILOC_OP_REG, $1->temp_result), 
+                        new_operand(ILOC_OP_REG, $3->temp_result), 
+                        new_operand(ILOC_OP_REG, $$->temp_result));
+                    $$->code = $1->code; $1->code = NULL;
+                    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
+                    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+               | expr_relacional '>' expr_aditiva      { 
+                    $$ = asd_new_binary_op(">", $1, $3); 
+                    check_types($$, $1, $3); 
+                    $$->temp_result = new_temp();
+                    ILOC_Op* op = new_operation("cmp_GT", 
+                        new_operand(ILOC_OP_REG, $1->temp_result), 
+                        new_operand(ILOC_OP_REG, $3->temp_result), 
+                        new_operand(ILOC_OP_REG, $$->temp_result));
+                    $$->code = $1->code; $1->code = NULL;
+                    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
+                    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+               | expr_relacional TK_OC_LE expr_aditiva { 
+                    $$ = asd_new_binary_op("<=", $1, $3); 
+                    check_types($$, $1, $3); 
+                    $$->temp_result = new_temp();
+                    ILOC_Op* op = new_operation("cmp_LE", 
+                        new_operand(ILOC_OP_REG, $1->temp_result), 
+                        new_operand(ILOC_OP_REG, $3->temp_result), 
+                        new_operand(ILOC_OP_REG, $$->temp_result));
+                    $$->code = $1->code; $1->code = NULL;
+                    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
+                    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+               | expr_relacional TK_OC_GE expr_aditiva { 
+                    $$ = asd_new_binary_op(">=", $1, $3); 
+                    check_types($$, $1, $3); 
+                    $$->temp_result = new_temp();
+                    ILOC_Op* op = new_operation("cmp_GE", 
+                        new_operand(ILOC_OP_REG, $1->temp_result), 
+                        new_operand(ILOC_OP_REG, $3->temp_result), 
+                        new_operand(ILOC_OP_REG, $$->temp_result));
+                    $$->code = $1->code; $1->code = NULL;
+                    concat_iloc_lists($$->code, $3->code); $3->code = NULL;
+                    concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
                | expr_aditiva                          { $$ = $1;}
                ;
 
@@ -633,9 +735,33 @@ expr_multiplicativa: expr_multiplicativa '*' expr_unaria {
                    | expr_unaria                         { $$ = $1; }
                    ;
 
-expr_unaria: '+' fator { $$ = asd_new_unary_op("+", $2); $$->data_type = $2->data_type; }
-           | '-' fator { $$ = asd_new_unary_op("-", $2); $$->data_type = $2->data_type; }
-           | '!' fator { $$ = asd_new_unary_op("!", $2); $$->data_type = $2->data_type; }
+expr_unaria: '+' fator { 
+                $$ = asd_new_unary_op("+", $2); 
+                $$->data_type = $2->data_type; 
+                $$->temp_result = $2->temp_result;
+                $$->code = $2->code;
+                $2->code = NULL;}
+           | '-' fator { 
+                $$ = asd_new_unary_op("-", $2); 
+                $$->data_type = $2->data_type; 
+                $$->temp_result = new_temp();
+                ILOC_Operand* src = new_operand(ILOC_OP_REG, $2->temp_result);
+                ILOC_Operand* zero = new_operand(ILOC_OP_CONST, "0");
+                ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+                ILOC_Op* op = new_operation("rsubI", src, zero, dest);
+
+                $$->code = $2->code; $2->code = NULL;
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
+           | '!' fator { 
+                $$ = asd_new_unary_op("!", $2); 
+                $$->data_type = $2->data_type; 
+                $$->temp_result = new_temp();
+                ILOC_Operand* src = new_operand(ILOC_OP_REG, $2->temp_result);
+                ILOC_Operand* one = new_operand(ILOC_OP_CONST, "1");
+                ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
+                ILOC_Op* op = new_operation("xorI", src, one, dest);
+                $$->code = $2->code; $2->code = NULL;
+                concat_iloc_lists($$->code, new_iloc_list(new_iloc_node(op)));}
            | fator     { $$ = $1; }
            ;
 

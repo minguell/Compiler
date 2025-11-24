@@ -15,7 +15,9 @@ int main (int argc, char **argv)
 {
   push_scope();
   int ret = yyparse();
-  asd_print_graphviz(arvore);
+  if (arvore && arvore->code) {
+         print_program(arvore->code);
+    }
   asd_free(arvore);
   yylex_destroy();
   free_all_scopes();
