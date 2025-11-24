@@ -56,4 +56,6 @@ char *new_label();
 // Gera um novo nome de registrador temporário único (ex: "r5")
 char *new_temp();
 
+void print_program(ILOC_List* program);
+
 #endif // _ILOC_H_
