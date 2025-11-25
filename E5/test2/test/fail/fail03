@@ -1,5 +1,0 @@
-//ERR_UNDECLARED
-f -> inteiro := [
-  var b := inteiro
-  b := a
-];

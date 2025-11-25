@@ -104,7 +104,7 @@ elemento: declaracao_variavel   { $$ = $1; }
 declaracao_variavel: TK_VAR TK_ID TK_ATRIB tipo_num {
                          add_symbol($2.valor, $2.numero_linha, NATURE_VARIABLE, $4);
                          free($2.valor);
-                         $$ = NULL; // Declaração simples não gera nó na AST
+                         $$ = NULL;
                     }
                    | TK_VAR TK_ID TK_ATRIB tipo_num TK_COM literal {
                          symbol_t* s = add_symbol($2.valor, $2.numero_linha, NATURE_VARIABLE, $4);
@@ -142,12 +142,9 @@ declaracao_funcao: cabecalho_funcao '[' sequencia_comandos ']' {
         $$ = $1;
         if ($3 != NULL) {
            asd_add_child($$, $3);
-           // Concatena código do corpo
            $$->code = safe_concat($$->code, $3->code);
            $3->code = NULL;
         }
-        // Removemos o escopo criado no cabecalho_funcao
-        // Como não chamamos bloco_de_comandos, não houve um push_scope extra aqui dentro
         pop_scope();
         current_function = NULL;
    }
@@ -193,7 +190,6 @@ parametros: parametro                { $$ = asd_new("params"); asd_add_child($$,
           ;
 
 parametro: TK_ID TK_ATRIB tipo_num {
-               // Adiciona o parâmetro à tabela de símbolos do escopo atual
                add_symbol($1.valor, $1.numero_linha, NATURE_VARIABLE, $3);
                
                $$ = asd_new($1.valor);
@@ -263,7 +259,6 @@ matched_statement: TK_SE '(' expressao ')' matched_statement TK_SENAO matched_st
                         // 1. Código da Condição + CBR
                         $$->code = $3->code;
                         $3->code = NULL;
-                        // cbr r_cond -> L_true, L_false
                         ILOC_Op* op_cbr = new_operation("cbr", op_cond, op_lbl_true, op_lbl_false);
                         $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_cbr)));
 
@@ -336,7 +331,7 @@ unmatched_statement: TK_SE '(' expressao ')' comando {
                         if ($5 != NULL) asd_add_child($$, $5);
                         if ($7 != NULL) asd_add_child($$, $7);
                         char* true_label = new_label();
-                        char* false_label = new_label(); // Faltava este rótulo
+                        char* false_label = new_label(); 
                         char* end_label = new_label();
 
                         ILOC_Operand* op_cond = new_operand(ILOC_OP_REG, $3->temp_result);
@@ -356,7 +351,7 @@ unmatched_statement: TK_SE '(' expressao ')' comando {
                             $$->code = safe_concat($$->code, $5->code);
                             $5->code = NULL;
                         }
-                        // Faltava este Jump para pular o else
+                        
                         ILOC_Op* op_jump = new_operation("jumpI", op_lbl_end, NULL, NULL); 
                         $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_jump)));
 
@@ -382,7 +377,6 @@ outro_comando: bloco_de_comandos { $$ = $1; }
              ;
 
 literal: TK_LI_INTEIRO { 
-    // Cria o nó da árvore (código existente)
     $$ = asd_new($1.valor); 
     $$->data_type = TYPE_INTEGER; 
     add_symbol($1.valor, $1.numero_linha, NATURE_LITERAL, TYPE_INTEGER); 
@@ -406,7 +400,6 @@ literal: TK_LI_INTEIRO {
        ;
 
 atribuicao: TK_ID TK_ATRIB expressao { 
-                // Verifica declaração e tipos da atribuição
                 symbol_t* symbol = find_symbol($1.valor);
                 if (symbol == NULL) {
                     semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
@@ -420,7 +413,7 @@ atribuicao: TK_ID TK_ATRIB expressao {
 
                 $$ = asd_new(":=");
                 $$->data_type = symbol->type;
-                asd_tree_t* id_node = asd_new($1.valor); // Recriando nó ID para visualização
+                asd_tree_t* id_node = asd_new($1.valor); 
                 id_node->data_type = symbol->type;
                 asd_add_child($$, id_node);
                 asd_add_child($$, $3);
@@ -428,7 +421,7 @@ atribuicao: TK_ID TK_ATRIB expressao {
                 // --- GERAÇÃO DE CÓDIGO ---
                 // 1. Herda o código da expressão
                 $$->code = $3->code;
-                $3->code = NULL; // <--- CORREÇÃO CRÍTICA: O pai assume o código, o filho não deve mais apontar para ele.
+                $3->code = NULL; 
 
                 // 2. Gera o store
                 char* base_reg = (symbol->is_global) ? "rbss" : "rfp";
@@ -440,19 +433,15 @@ atribuicao: TK_ID TK_ATRIB expressao {
                 ILOC_Operand* op_src = new_operand(ILOC_OP_REG, $3->temp_result);
                 ILOC_Op* op_store = new_operation("storeAI", op_src, op_base, op_offset);
                 
-                // Anexa ao final
                 $$->code = safe_concat($$->code, new_iloc_list(new_iloc_node(op_store)));
                 
                 free($1.valor);
             };
 
 chamada_funcao: TK_ID '(' ')' {
-                    // Verifica a chamada de função sem argumentos
                     symbol_t* symbol = find_symbol($1.valor);
                     if (symbol == NULL) semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
                     if (symbol->nature != NATURE_FUNCTION) semantic_error(ERR_VARIABLE, $1.numero_linha, $1.valor);
-                    
-                    // Se a função esperava parâmetros, lança erro.
                     if (symbol->params != NULL && symbol->params->number_of_children > 0) {
                         semantic_error(ERR_MISSING_ARGS, $1.numero_linha, $1.valor);
                     }
@@ -498,7 +487,6 @@ argumentos: expressao {
           ;
 
 retorno: TK_RETORNA expressao TK_ATRIB tipo_num { 
-            // Verifica se o tipo do retorno é compatível com o tipo da expressão
             if ($4 != $2->data_type) {
                 semantic_error(ERR_WRONG_TYPE, get_line_number(), "Tipo de retorno incompatível com a expressão retornada.");
             }
@@ -522,9 +510,9 @@ repeticao: TK_ENQUANTO '(' expressao ')' bloco_de_comandos {
                 $$->data_type = $3->data_type;
                 asd_add_child($$, $3);
                 if ($5 != NULL) asd_add_child($$, $5);
-                char* start_label = new_label(); // Começo do loop (antes da condição)
-                char* true_label = new_label();  // Corpo do loop
-                char* end_label = new_label();   // Saída
+                char* start_label = new_label(); 
+                char* true_label = new_label();  
+                char* end_label = new_label();   
 
                 ILOC_Operand* op_cond = new_operand(ILOC_OP_REG, $3->temp_result);
                 ILOC_Operand* op_lbl_start = new_operand(ILOC_OP_LABEL, start_label);
@@ -733,7 +721,6 @@ expr_multiplicativa: expr_multiplicativa '*' expr_unaria {
                 ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
                 ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
                 
-                // Note o opcode "mult"
                 ILOC_Op* op = new_operation("mult", src1, src2, dest);
                 $$->code = safe_concat($1->code, $3->code);
                 $1->code = NULL;
@@ -752,7 +739,6 @@ expr_multiplicativa: expr_multiplicativa '*' expr_unaria {
                 ILOC_Operand* src2 = new_operand(ILOC_OP_REG, $3->temp_result);
                 ILOC_Operand* dest = new_operand(ILOC_OP_REG, $$->temp_result);
                 
-                // Note o opcode "div"
                 ILOC_Op* op = new_operation("div", src1, src2, dest);
 
                 $$->code = safe_concat($1->code, $3->code);
@@ -795,7 +781,6 @@ expr_unaria: '+' fator {
            ;
 
 fator: TK_ID {
-           //  Busca o identificador e anota seu tipo no nó
             symbol_t* symbol = find_symbol($1.valor);
             if (symbol == NULL) {
                 semantic_error(ERR_UNDECLARED, $1.numero_linha, $1.valor);
@@ -807,7 +792,7 @@ fator: TK_ID {
             $$->data_type = symbol->type;
             
             // --- GERAÇÃO DE CÓDIGO (Load Variable) ---
-            $$->temp_result = new_temp(); // Registrador onde o valor vai ficar
+            $$->temp_result = new_temp(); 
             
             char* base_reg = (symbol->is_global) ? "rbss" : "rfp";
 
@@ -841,7 +826,6 @@ void check_function_call_args(symbol_t* func_symbol, asd_tree_t* args_node, int 
     int num_params = param_list->number_of_children;
     int num_args = args_node->number_of_children;
 
-    // Verifica contagem de argumentos
     if (num_args < num_params) {
         semantic_error(ERR_MISSING_ARGS, line, func_symbol->key);
     }
@@ -849,13 +833,11 @@ void check_function_call_args(symbol_t* func_symbol, asd_tree_t* args_node, int 
         semantic_error(ERR_EXCESS_ARGS, line, func_symbol->key);
     }
 
-    // Verifica os tipos 
     for (int i = 0; i < num_params; i++) {
         asd_tree_t* current_param = param_list->children[i];
         asd_tree_t* current_arg = args_node->children[i];
 
         if (current_param->data_type != current_arg->data_type) {
-            // Reporta erro especificando o argumento
             char error_msg[256];
             sprintf(error_msg, "Argumento %d na chamada da função '%s' está com tipo errado.", i+1, func_symbol->key);
             semantic_error(ERR_WRONG_TYPE_ARGS, line, error_msg);
@@ -863,7 +845,7 @@ void check_function_call_args(symbol_t* func_symbol, asd_tree_t* args_node, int 
     }
 }
 
-// Implementação das funções auxiliares
+
 void yyerror (char const *mensagem) {
     fprintf (stderr, "Erro sintático na Linha %i: %s\n", get_line_number(), mensagem);
 }
@@ -881,13 +863,12 @@ static asd_tree_t* asd_new_unary_op(const char* label, asd_tree_t* child) {
      return node;
 }
 
-// Implementação da verificação de tipos para expressões binárias
 void check_types(asd_tree_t* node, asd_tree_t* child1, asd_tree_t* child2) {
     if (child1->data_type == TYPE_UNDEFINED || child2->data_type == TYPE_UNDEFINED) {
         node->data_type = TYPE_UNDEFINED;
         return;
     }
-    // float e int não podem ser misturados
+
     if (child1->data_type != child2->data_type) {
         semantic_error(ERR_WRONG_TYPE, get_line_number(), "Operação com tipos incompatíveis (int e float).");
     }

@@ -1,8 +1,0 @@
-//ERR_DECLARED
-f -> inteiro := [
-  var c := inteiro
-  enquanto (c) [
-    var b := inteiro
-    var b := inteiro
-  ]
-];

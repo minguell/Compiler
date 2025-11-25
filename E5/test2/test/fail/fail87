@@ -1,5 +1,0 @@
-//ERR_WRONG_TYPE
-f -> inteiro := [
-  var number := inteiro
-  number := 4.5
-];

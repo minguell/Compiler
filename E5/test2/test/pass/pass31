@@ -1,9 +1,0 @@
-producer -> inteiro := [
-  retorna 5 := inteiro
-],
-consumer -> inteiro := [
-  producer()
-],
-f -> inteiro := [
-  consumer()
-];

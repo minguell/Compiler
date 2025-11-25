@@ -1,6 +1,0 @@
-//ERR_FUNCTION
-g -> inteiro := [],
-f -> inteiro := [
-  var a := inteiro
-  a := g
-];

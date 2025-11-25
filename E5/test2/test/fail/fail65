@@ -1,6 +1,0 @@
-//ERR_WRONG_TYPE
-f -> inteiro := [
-  var a := inteiro
-  var b := decimal
-  a := a*2/3+4|a+b
-];

@@ -1,6 +1,0 @@
-//ERR_VARIABLE
-var b := inteiro,
-f -> inteiro := [
-  var a := inteiro
-  a := b()
-];

@@ -9,8 +9,8 @@
 scope_t *scope_stack = NULL;
 
 // Contadores de deslocamento
-static int global_offset = 0; // Deslocamento para globais (rbss)
-static int local_offset = 0;  // Deslocamento para locais (rfp)
+static int global_offset = 0; 
+static int local_offset = 0;  
 
 // --- Funções da Pilha de Escopos ---
 
@@ -91,10 +91,7 @@ if (scope_stack->next == NULL) {
 
     return new_symbol; // Retorna o símbolo criado
 }
-// IMPORTANTE: Quando saímos de uma função, devemos resetar o local_offset?
-// Geralmente sim, para a próxima função começar do zero.
-// Adicione isso na pop_scope se desejar reutilizar espaço, ou deixe crescer se não houver múltiplas funções.
-// Como o enunciado diz "apenas uma função"[cite: 256], não é crítico resetar.
+
 symbol_t* find_symbol(const char* key) {
     scope_t* current_scope = scope_stack;
     while (current_scope != NULL) {

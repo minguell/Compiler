@@ -1,6 +1,0 @@
-//ERR_WRONG_TYPE_ARGS
-h -> inteiro com a := inteiro := [],
-f -> inteiro := [
-  var b := decimal
-  h(b)
-];

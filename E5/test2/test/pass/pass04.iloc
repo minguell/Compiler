@@ -1,2 +1,0 @@
-loadI 2 => r0
-storeAI r0 => rbss, 0

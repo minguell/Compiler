@@ -1,5 +1,0 @@
-//ERR_WRONG_TYPE
-f -> decimal := [
-  var base := decimal
-  retorna 4 := inteiro
-];

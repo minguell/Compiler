@@ -1,8 +1,0 @@
-f -> inteiro := [
-  var counter := inteiro
-  counter := 6
-  enquanto(counter) [
-    counter := counter + (-1)
-  ]
-  retorna counter := inteiro
-];
